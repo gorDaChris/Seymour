@@ -116,6 +116,12 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "sliding_up_panel",
+      "rootUri": "file:///C:/Users/newmi/AppData/Local/Pub/Cache/hosted/pub.dev/sliding_up_panel-2.0.0+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "source_span",
       "rootUri": "file:///C:/Users/newmi/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.0",
       "packageUri": "lib/",
@@ -170,7 +176,7 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2024-06-15T19:50:03.060194Z",
+  "generated": "2024-06-15T21:47:40.752108Z",
   "generator": "pub",
   "generatorVersion": "3.4.3",
   "flutterRoot": "file:///C:/Users/newmi/Downloads/flutter_windows_2.0.1-stable/flutter",

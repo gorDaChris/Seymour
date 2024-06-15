@@ -13,8 +13,96 @@ class _MapPageState extends State<MapPage> {
   TextEditingController bottomTextController = TextEditingController();
 
   double _turnsShowBottomTextFieldButton = 0;
-
   bool _showBottomTextField = false;
+
+  void _handleShowSideButtons() {
+    _showAllSideButtons = !_showAllSideButtons;
+    if (_showAllSideButtons) {
+      _sideButtons.add(Card(
+        child: IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.route),
+        ),
+      ));
+
+      _listKey.currentState?.insertItem(1);
+
+      _sideButtons.add(Card(
+        child: IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.ios_share),
+        ),
+      ));
+
+      _listKey.currentState?.insertItem(2);
+
+      _sideButtons.add(Card(
+        child: IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.navigation),
+        ),
+      ));
+
+      _listKey.currentState?.insertItem(3);
+    } else {
+      _sideButtons.removeAt(1);
+      _listKey.currentState?.removeItem(1, (context, animation) {
+        return SlideTransition(
+          position:
+              animation.drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+          child: Card(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.route),
+            ),
+          ),
+        );
+      });
+      _sideButtons.removeAt(1);
+      _listKey.currentState?.removeItem(1, (context, animation) {
+        return SlideTransition(
+          position:
+              animation.drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+          child: Card(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.ios_share),
+            ),
+          ),
+        );
+      });
+
+      _sideButtons.removeAt(1);
+      _listKey.currentState?.removeItem(1, (context, animation) {
+        return SlideTransition(
+          position:
+              animation.drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+          child: Card(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.navigation),
+            ),
+          ),
+        );
+      });
+    }
+  }
+
+  final List<Widget> _sideButtons = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _sideButtons.add(Card(
+      child:
+          IconButton(onPressed: _handleShowSideButtons, icon: const Icon(Icons.add)),
+    ));
+  }
+
+  final _listKey = GlobalKey<AnimatedListState>();
+  bool _showAllSideButtons = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,6 +138,9 @@ class _MapPageState extends State<MapPage> {
                           ),
                         ),
                         Visibility(
+                          maintainAnimation: true,
+                          maintainState: true,
+                          maintainSize: true,
                           visible: _showBottomTextField,
                           child: Container(
                             transformAlignment: Alignment.centerLeft,
@@ -84,6 +175,24 @@ class _MapPageState extends State<MapPage> {
                   ],
                 ),
               ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: SizedBox(
+                  width: 65,
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  child: AnimatedList(
+                    padding: const EdgeInsets.all(5),
+                    key: _listKey,
+                    initialItemCount: 1,
+                    itemBuilder: (context, index, animation) {
+                      return SlideTransition(
+                          position: animation.drive(
+                              Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+                          child: _sideButtons[index]);
+                    },
+                  ),
+                ),
+              )
             ],
           ),
         ]),

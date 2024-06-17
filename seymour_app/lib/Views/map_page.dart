@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:seymour_app/Views/draggable_menu.dart';
+import 'package:seymour_app/views/draggable_menu.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -48,8 +48,8 @@ class _MapPageState extends State<MapPage> {
       _sideButtons.removeAt(1);
       _listKey.currentState?.removeItem(1, (context, animation) {
         return SlideTransition(
-          position:
-              animation.drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+          position: animation
+              .drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
           child: Card(
             child: IconButton(
               onPressed: () {},
@@ -61,8 +61,8 @@ class _MapPageState extends State<MapPage> {
       _sideButtons.removeAt(1);
       _listKey.currentState?.removeItem(1, (context, animation) {
         return SlideTransition(
-          position:
-              animation.drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+          position: animation
+              .drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
           child: Card(
             child: IconButton(
               onPressed: () {},
@@ -75,8 +75,8 @@ class _MapPageState extends State<MapPage> {
       _sideButtons.removeAt(1);
       _listKey.currentState?.removeItem(1, (context, animation) {
         return SlideTransition(
-          position:
-              animation.drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+          position: animation
+              .drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
           child: Card(
             child: IconButton(
               onPressed: () {},
@@ -95,8 +95,8 @@ class _MapPageState extends State<MapPage> {
     // TODO: implement initState
     super.initState();
     _sideButtons.add(Card(
-      child:
-          IconButton(onPressed: _handleShowSideButtons, icon: const Icon(Icons.add)),
+      child: IconButton(
+          onPressed: _handleShowSideButtons, icon: const Icon(Icons.add)),
     ));
   }
 
@@ -186,8 +186,9 @@ class _MapPageState extends State<MapPage> {
                     initialItemCount: 1,
                     itemBuilder: (context, index, animation) {
                       return SlideTransition(
-                          position: animation.drive(
-                              Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+                          position: animation.drive(Tween(
+                              begin: const Offset(3, 0),
+                              end: const Offset(0, 0))),
                           child: _sideButtons[index]);
                     },
                   ),

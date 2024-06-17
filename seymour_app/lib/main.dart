@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:seymour_app/Views/map_page.dart';
+import 'package:seymour_app/views/map_page.dart';
 
 void main() {
   runApp(const MyApp());

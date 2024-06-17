@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:seymour_app/views/draggable_menu.dart';
+import 'package:seymour_app/Views/draggable_menu.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});

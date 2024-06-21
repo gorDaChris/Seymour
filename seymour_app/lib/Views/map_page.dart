@@ -44,12 +44,7 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SavePage()),
-            );
-          },
+          onPressed: () {},
           icon: const Icon(Icons.navigation),
         ),
       ));

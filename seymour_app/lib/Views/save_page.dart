@@ -63,16 +63,29 @@ class _SavePageState extends State<SavePage> {
     return Scaffold(
       body: Column(
         children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(items[index]),
-                );
-              },
+          if (items.isEmpty) ...[
+            // TODO completely center text 
+            const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text("Looks like you haven't saved anything yet."),
+                ]
+              )
+            )
+          ] else ...[ 
+            Expanded(
+              child: ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(items[index]),
+                  );
+                },
+              ),
             ),
-          ),
+          ],
         ],
       ),
       bottomNavigationBar: BottomAppBar(

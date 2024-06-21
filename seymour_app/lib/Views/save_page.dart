@@ -76,27 +76,38 @@ class _SavePageState extends State<SavePage> {
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: _showInputDialog,
-                child: const Text("SAVE AS"),
+        child: SizedBox (
+          height: 50,
+          child: Row(
+            children: [
+              Expanded ( 
+                child: SizedBox ( // SAVE AS button
+                  height: 75,
+                  child: ElevatedButton(
+                    onPressed: _showInputDialog,
+                    style: ElevatedButton.styleFrom(
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    child: const Text("SAVE AS"),
+                  ),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Placeholder button, does nothing for now
-                },
-                child: const Text("IMPORT"),
+              Expanded(
+                child: SizedBox ( // IMPORT button
+                  height: 75,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero)
+                        ),
+                    onPressed: () {},
+                    child: const Text("IMPORT"),
+                  ),
+                ),
               ),
-            ),
-          ],
-        )
+            ], 
+          ),
+        ),
       )
     );
   }

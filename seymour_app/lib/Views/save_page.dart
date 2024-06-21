@@ -21,7 +21,7 @@ class _SavePageState extends State<SavePage> {
   // TODO: list of Row Widgets
   List<String> items = [];
   final TextEditingController _textController = TextEditingController();
-  
+
   // TODO: click row widget to expand options
 
   void _showInputDialog() {
@@ -61,67 +61,67 @@ class _SavePageState extends State<SavePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          if (items.isEmpty) ...[
-            // TODO completely center text 
-            const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text("Looks like you haven't saved anything yet."),
-                ]
-              )
-            )
-          ] else ...[ 
-            Expanded(
-              child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(items[index]),
-                  );
-                },
-              ),
-            ),
-          ],
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: SizedBox (
-          height: 50,
-          child: Row(
-            children: [
-              Expanded ( 
-                child: SizedBox ( // SAVE AS button
-                  height: 75,
-                  child: ElevatedButton(
-                    onPressed: _showInputDialog,
-                    style: ElevatedButton.styleFrom(
-                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                    ),
-                    child: const Text("SAVE AS"),
-                  ),
-                ),
-              ),
+        appBar: AppBar(),
+        body: Column(
+          children: [
+            if (items.isEmpty) ...[
+              // TODO completely center text
+              const Center(
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                    Text("Looks like you haven't saved anything yet."),
+                  ]))
+            ] else ...[
               Expanded(
-                child: SizedBox ( // IMPORT button
-                  height: 75,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero)
-                        ),
-                    onPressed: () {},
-                    child: const Text("IMPORT"),
-                  ),
+                child: ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(items[index]),
+                    );
+                  },
                 ),
               ),
-            ], 
-          ),
+            ],
+          ],
         ),
-      )
-    );
+        bottomNavigationBar: BottomAppBar(
+          child: SizedBox(
+            height: 50,
+            child: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    // SAVE AS button
+                    height: 75,
+                    child: ElevatedButton(
+                      onPressed: _showInputDialog,
+                      style: ElevatedButton.styleFrom(
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero),
+                      ),
+                      child: const Text("SAVE AS"),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: SizedBox(
+                    // IMPORT button
+                    height: 75,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero)),
+                      onPressed: () {},
+                      child: const Text("IMPORT"),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 }

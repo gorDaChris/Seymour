@@ -16,6 +16,11 @@ class _MapPageState extends State<MapPage> {
   double _turnsShowBottomTextFieldButton = 0;
   bool _showBottomTextField = false;
 
+  void navigateToImportExportSavePage() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const SavePage()));
+  }
+
   void _handleShowSideButtons() {
     _showAllSideButtons = !_showAllSideButtons;
     if (_showAllSideButtons) {

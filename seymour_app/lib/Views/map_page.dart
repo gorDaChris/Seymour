@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
+import 'package:seymour_app/Views/save_page.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -29,7 +30,12 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SavePage()),
+            );
+          },
           icon: const Icon(Icons.ios_share),
         ),
       ));
@@ -38,7 +44,12 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SavePage()),
+            );
+          },
           icon: const Icon(Icons.navigation),
         ),
       ));

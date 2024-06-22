@@ -32,7 +32,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
       ),
       body: widget.backgroundChild,
 
-      //This ListView will have to be changed to ListView.builder when it eventually displays locations
+      //This ListView may have to be changed to ListView.builder when it eventually displays locations
       panel: ListView(
         children: [
           ElevatedButton(

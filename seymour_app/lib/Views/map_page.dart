@@ -24,6 +24,10 @@ class _MapPageState extends State<MapPage> {
   void _handleShowSideButtons() {
     _showAllSideButtons = !_showAllSideButtons;
     if (_showAllSideButtons) {
+      setState(() {
+        _showSideButtonsButtonTurns = 0.125;
+      });
+
       _sideButtons.add(Card(
         child: IconButton(
           onPressed: () {},
@@ -31,21 +35,18 @@ class _MapPageState extends State<MapPage> {
         ),
       ));
 
-      _listKey.currentState?.insertItem(1);
+      _listKey.currentState?.insertItem(0);
 
       _sideButtons.add(Card(
         child: IconButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SavePage()),
-            );
+            navigateToImportExportSavePage();
           },
           icon: const Icon(Icons.ios_share),
         ),
       ));
 
-      _listKey.currentState?.insertItem(2);
+      _listKey.currentState?.insertItem(1);
 
       _sideButtons.add(Card(
         child: IconButton(
@@ -54,10 +55,14 @@ class _MapPageState extends State<MapPage> {
         ),
       ));
 
-      _listKey.currentState?.insertItem(3);
+      _listKey.currentState?.insertItem(2);
     } else {
-      _sideButtons.removeAt(1);
-      _listKey.currentState?.removeItem(1, (context, animation) {
+      setState(() {
+        _showSideButtonsButtonTurns = 0;
+      });
+
+      _sideButtons.removeAt(0);
+      _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
               .drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
@@ -69,8 +74,8 @@ class _MapPageState extends State<MapPage> {
           ),
         );
       });
-      _sideButtons.removeAt(1);
-      _listKey.currentState?.removeItem(1, (context, animation) {
+      _sideButtons.removeAt(0);
+      _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
               .drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
@@ -83,8 +88,8 @@ class _MapPageState extends State<MapPage> {
         );
       });
 
-      _sideButtons.removeAt(1);
-      _listKey.currentState?.removeItem(1, (context, animation) {
+      _sideButtons.removeAt(0);
+      _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
               .drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
@@ -105,14 +110,11 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _sideButtons.add(Card(
-      child: IconButton(
-          onPressed: _handleShowSideButtons, icon: const Icon(Icons.add)),
-    ));
   }
 
   final _listKey = GlobalKey<AnimatedListState>();
   bool _showAllSideButtons = false;
+  double _showSideButtonsButtonTurns = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -191,17 +193,34 @@ class _MapPageState extends State<MapPage> {
                 child: SizedBox(
                   width: 65,
                   height: MediaQuery.of(context).size.height * 0.4,
-                  child: AnimatedList(
-                    padding: const EdgeInsets.all(5),
-                    key: _listKey,
-                    initialItemCount: 1,
-                    itemBuilder: (context, index, animation) {
-                      return SlideTransition(
-                          position: animation.drive(Tween(
-                              begin: const Offset(3, 0),
-                              end: const Offset(0, 0))),
-                          child: _sideButtons[index]);
-                    },
+                  child: Column(
+                    children: [
+                      Card(
+                        child: IconButton(
+                            onPressed: _handleShowSideButtons,
+                            icon: AnimatedRotation(
+                              turns: _showSideButtonsButtonTurns,
+                              duration: Duration(milliseconds: 200),
+                              child: const Icon(Icons.add),
+                            )),
+                      ),
+                      SizedBox(
+                        width: 65,
+                        height: MediaQuery.of(context).size.height * 0.3,
+                        child: AnimatedList(
+                          padding: const EdgeInsets.all(5),
+                          key: _listKey,
+                          initialItemCount: 0,
+                          itemBuilder: (context, index, animation) {
+                            return SlideTransition(
+                                position: animation.drive(Tween(
+                                    begin: const Offset(3, 0),
+                                    end: const Offset(0, 0))),
+                                child: _sideButtons[index]);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               )

@@ -200,7 +200,7 @@ class _MapPageState extends State<MapPage> {
                             onPressed: _handleShowSideButtons,
                             icon: AnimatedRotation(
                               turns: _showSideButtonsButtonTurns,
-                              duration: Duration(milliseconds: 200),
+                              duration: const Duration(milliseconds: 200),
                               child: const Icon(Icons.add),
                             )),
                       ),

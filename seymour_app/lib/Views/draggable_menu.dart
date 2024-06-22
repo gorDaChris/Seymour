@@ -15,7 +15,7 @@ class DraggableMenu extends StatefulWidget {
 }
 
 class _DraggableMenuState extends State<DraggableMenu> {
-  double radius = 5.0; //5.0 is not chosen for any particular reason
+  double radius = 0.5; //TODO: talk about whether we should use diameter instead
 
   @override
   Widget build(BuildContext context) {
@@ -32,31 +32,46 @@ class _DraggableMenuState extends State<DraggableMenu> {
       ),
       body: widget.backgroundChild,
 
-      //This ListView will have to be changed to ListView.builder when it eventually displays locations
+      //This ListView may have to be changed to ListView.builder when it eventually displays locations
       panel: ListView(
         children: [
           ElevatedButton(
             child: const Text("Adjust Filters"),
             onPressed: () {},
           ),
-          Slider(
-            min: 1,
-            max: 100,
-            value: radius,
-            onChanged: (value) {
-              if (widget.onRadiusChanged is void Function(double)) {
-                widget.onRadiusChanged!(value);
-              }
-              setState(() {
-                radius = value;
-              });
-            },
-            label: radius.toString(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                flex: 5,
+                child: Slider(
+                  min: 0.1,
+                  max: 2,
+                  value: radius,
+                  onChanged: (value) {
+                    if (widget.onRadiusChanged is void Function(double)) {
+                      widget.onRadiusChanged!(value);
+                    }
+                    setState(() {
+                      radius = value;
+                    });
+                  },
+                  label: radius.toString(),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  "${(radius * 10).round() / 10} mi",
+                  textScaler: const TextScaler.linear(1.3),
+                ),
+              ) //Round to 1 decimal place
+            ],
           ),
           const Divider(),
           const Text("Selected Sights"),
           const Divider(),
-          const Text("Recomended Sights")
+          const Text("Recommended Sights")
         ],
       ),
     );

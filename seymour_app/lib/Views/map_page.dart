@@ -106,12 +106,6 @@ class _MapPageState extends State<MapPage> {
 
   final List<Widget> _sideButtons = [];
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
   final _listKey = GlobalKey<AnimatedListState>();
   bool _showAllSideButtons = false;
   double _showSideButtonsButtonTurns = 0;
@@ -134,7 +128,7 @@ class _MapPageState extends State<MapPage> {
               Center(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       children: [
@@ -169,20 +163,23 @@ class _MapPageState extends State<MapPage> {
                         )
                       ],
                     ),
-                    AnimatedRotation(
-                      turns: _turnsShowBottomTextFieldButton,
-                      duration: const Duration(milliseconds: 400),
-                      child: Card(
-                        child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _showBottomTextField = !_showBottomTextField;
-                                _turnsShowBottomTextFieldButton +=
-                                    0.25 * (_showBottomTextField ? -1 : 1);
-                              });
-                            },
-                            icon:
-                                const Icon(Icons.keyboard_arrow_left_outlined)),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: AnimatedRotation(
+                        turns: _turnsShowBottomTextFieldButton,
+                        duration: const Duration(milliseconds: 400),
+                        child: Card(
+                          child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _showBottomTextField = !_showBottomTextField;
+                                  _turnsShowBottomTextFieldButton +=
+                                      0.25 * (_showBottomTextField ? -1 : 1);
+                                });
+                              },
+                              icon: const Icon(
+                                  Icons.keyboard_arrow_left_outlined)),
+                        ),
                       ),
                     ),
                   ],
@@ -191,7 +188,7 @@ class _MapPageState extends State<MapPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: SizedBox(
-                  width: 65,
+                  width: 56,
                   height: MediaQuery.of(context).size.height * 0.4,
                   child: Column(
                     children: [
@@ -205,10 +202,9 @@ class _MapPageState extends State<MapPage> {
                             )),
                       ),
                       SizedBox(
-                        width: 65,
                         height: MediaQuery.of(context).size.height * 0.3,
                         child: AnimatedList(
-                          padding: const EdgeInsets.all(5),
+                          padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
                           key: _listKey,
                           initialItemCount: 0,
                           itemBuilder: (context, index, animation) {

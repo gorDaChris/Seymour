@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+// ignore: depend_on_referenced_packages
+import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
@@ -133,9 +136,16 @@ class _MapPageState extends State<MapPage> {
           backgroundChild: Container(
         color: Colors.green,
         child: Stack(children: [
-          const Text(
-            "MAP",
-            textScaler: TextScaler.linear(20),
+          FlutterMap(
+            options: const MapOptions(
+              initialCenter: LatLng(42.728413, -73.691788), // temp
+              initialZoom: 9,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              ),
+            ]
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

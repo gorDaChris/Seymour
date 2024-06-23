@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:seymour_app/Common/Models/coordinate.dart';
+import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
 
@@ -12,6 +14,9 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
+
+  Coordinate? topAddress;
+  Coordinate? bottomAddress;
 
   double _turnsShowBottomTextFieldButton = 0;
   bool _showBottomTextField = false;
@@ -116,6 +121,11 @@ class _MapPageState extends State<MapPage> {
   bool _showAllSideButtons = false;
   double _showSideButtonsButtonTurns = 0;
 
+  Future<void> _handleAtoBRequest() async {
+    topAddress = await getCoordinateFromAddress(topTextController.text);
+    bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,6 +152,11 @@ class _MapPageState extends State<MapPage> {
                           width: MediaQuery.of(context).size.width * 0.8,
                           child: Card(
                             child: TextField(
+                              onSubmitted: (value) {
+                                if (_showBottomTextField) {
+                                  _handleAtoBRequest();
+                                }
+                              },
                               controller: topTextController,
                               decoration: InputDecoration(
                                   hintText: _showBottomTextField
@@ -160,6 +175,11 @@ class _MapPageState extends State<MapPage> {
                             width: MediaQuery.of(context).size.width * 0.8,
                             child: Card(
                               child: TextField(
+                                onSubmitted: (value) {
+                                  if (_showBottomTextField) {
+                                    _handleAtoBRequest();
+                                  }
+                                },
                                 controller: bottomTextController,
                                 decoration: const InputDecoration(
                                     hintText: "Destination"),

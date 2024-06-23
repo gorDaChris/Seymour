@@ -38,6 +38,7 @@ dependencies:
   sliding_up_panel: ^2.0.0+1
   http: ^1.2.1
   flutter_map: ^7.0.1
+  location: ^6.0.2
 
 dev_dependencies:
   flutter_test:

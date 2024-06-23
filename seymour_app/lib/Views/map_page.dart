@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:location/location.dart';
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
@@ -129,6 +130,30 @@ class _MapPageState extends State<MapPage> {
     bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
   }
 
+  Future<LocationData?> _currentLocation() async {
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+ 
+    Location location = Location();
+ 
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return null;
+      }
+    }
+ 
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return null;
+      }
+    }
+    return await location.getLocation();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,16 +161,25 @@ class _MapPageState extends State<MapPage> {
           backgroundChild: Container(
         color: Colors.green,
         child: Stack(children: [
-          FlutterMap(
-            options: const MapOptions(
-              initialCenter: LatLng(42.728413, -73.691788), // temp
-              initialZoom: 9,
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              ),
-            ]
+          FutureBuilder<LocationData?>(
+            future: _currentLocation(),
+            builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
+              if (snapchat.hasData) {
+                final LocationData currentLocation = snapchat.data;
+                return FlutterMap(
+                  options: MapOptions(
+                    initialCenter: LatLng(currentLocation.latitude!, currentLocation.longitude!), 
+                    initialZoom: 12,
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    ),
+                  ]
+                );
+              }
+              return const Center(child: CircularProgressIndicator());
+            }
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

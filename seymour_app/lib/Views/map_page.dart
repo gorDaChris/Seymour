@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
+import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
 
@@ -124,6 +125,10 @@ class _MapPageState extends State<MapPage> {
   Future<void> _handleAtoBRequest() async {
     topAddress = await getCoordinateFromAddress(topTextController.text);
     bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+
+    if (topAddress != null && bottomAddress != null) {
+      coordinatesToRoute([topAddress!, bottomAddress!], true);
+    }
   }
 
   @override

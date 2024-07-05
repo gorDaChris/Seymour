@@ -1,217 +1,98 @@
-import '/backend/api_requests/api_calls.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
 
-import 'home_page_model.dart';
-export 'home_page_model.dart';
-
-class HomePageWidget extends StatefulWidget {
-  const HomePageWidget({super.key});
-
-  @override
-  State<HomePageWidget> createState() => _HomePageWidgetState();
+void main() {
+  runApp(MyApp());
 }
 
-class _HomePageWidgetState extends State<HomePageWidget> {
-  late HomePageModel _model;
-
-  final scaffoldKey = GlobalKey<ScaffoldState>();
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => HomePageModel());
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: SurveyPage(),
+    );
   }
+}
+
+class SurveyPage extends StatefulWidget {
+  const SurveyPage({super.key});
 
   @override
-  void dispose() {
-    _model.dispose();
+  State<SurveyPage> createState() => _SurveyPageState();
+}
 
-    super.dispose();
+class _SurveyPageState extends State<SurveyPage> {
+  List<bool?> checkedItems = List<bool?>.generate(15, (index) => false);
+  List<String> tags = [
+    'Sculpture',
+    'Statue',
+    'Mural',
+    'Graffiti',
+    'Installation',
+    'Bust',
+    'Stone',
+    'Painting',
+    'Architecture',
+    'Mosaic',
+    'Relief',
+    'Fountain',
+    'Street Art',
+    'Azulejo',
+    'Land Art',
+  ];
+
+  Future<void> _saveCheckedItems() async {
+    try {
+      final file = await _localFile;
+      String jsonStr = jsonEncode(checkedItems);
+      await file.writeAsString(jsonStr);
+    } catch (e) {
+      print('Error saving tags: $e');
+    }
+  }
+  Future<File> get _localFile async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/tags.json');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
-      backgroundColor: FlutterFlowTheme.of(context).secondary,
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Stack(
-              children: [
-                Align(
-                  alignment: AlignmentDirectional(0, 0),
-                  child: Image.asset(
-                    'assets/images/pietro-de-grandi-T7K4aEPoGGk-unsplash.jpg',
-                    width: double.infinity,
-                    height: 255,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Align(
-                  alignment: AlignmentDirectional(0, 0),
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(20, 60, 20, 0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Align(
-                          alignment: AlignmentDirectional(0, 0),
-                          child: Padding(
-                            padding:
-                                EdgeInsetsDirectional.fromSTEB(0, 50, 0, 0),
-                            child: Text(
-                              'Seymour',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'PT Serif',
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryBackground,
-                                    fontSize: 70,
-                                    letterSpacing: 0,
-                                  ),
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: AlignmentDirectional(-1, 0),
-                          child: Padding(
-                            padding:
-                                EdgeInsetsDirectional.fromSTEB(10, 70, 0, 20),
-                            child: Text(
-                              'Please select applicable filters.',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 15,
-                                    letterSpacing: 0,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ),
-                        ),
-                        FutureBuilder<ApiCallResponse>(
-                          future: GetDepartmentsCall.call(),
-                          builder: (context, snapshot) {
-                            // Customize what your widget looks like when it's loading.
-                            if (!snapshot.hasData) {
-                              return Center(
-                                child: SizedBox(
-                                  width: 50,
-                                  height: 50,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      FlutterFlowTheme.of(context).primary,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-                            final gridViewGetDepartmentsResponse =
-                                snapshot.data!;
-                            return Builder(
-                              builder: (context) {
-                                final departments = getJsonField(
-                                  gridViewGetDepartmentsResponse.jsonBody,
-                                  r'''$.departments''',
-                                ).toList().take(30).toList();
-                                return GridView.builder(
-                                  padding: EdgeInsets.zero,
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 10,
-                                    mainAxisSpacing: 10,
-                                    childAspectRatio: 1.6,
-                                  ),
-                                  primary: false,
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.vertical,
-                                  itemCount: departments.length,
-                                  itemBuilder: (context, departmentsIndex) {
-                                    final departmentsItem =
-                                        departments[departmentsIndex];
-                                    return InkWell(
-                                      splashColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () async {
-                                        context.pushNamed(
-                                          'DepartmentHighlightsPage',
-                                          queryParameters: {
-                                            'departmentId': serializeParam(
-                                              getJsonField(
-                                                departmentsItem,
-                                                r'''$.departmentId''',
-                                              ),
-                                              ParamType.int,
-                                            ),
-                                            'displayName': serializeParam(
-                                              getJsonField(
-                                                departmentsItem,
-                                                r'''$.displayName''',
-                                              ).toString(),
-                                              ParamType.String,
-                                            ),
-                                          }.withoutNulls,
-                                        );
-                                      },
-                                      child: Card(
-                                        clipBehavior:
-                                            Clip.antiAliasWithSaveLayer,
-                                        color: Colors.white,
-                                        elevation: 4,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Align(
-                                          alignment: AlignmentDirectional(0, 0),
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    5, 0, 5, 0),
-                                            child: Text(
-                                              getJsonField(
-                                                departmentsItem,
-                                                r'''$.displayName''',
-                                              ).toString(),
-                                              textAlign: TextAlign.center,
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .displaySmall
-                                                      .override(
-                                                        fontFamily: 'Urbanist',
-                                                        letterSpacing: 0,
-                                                      ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+      body: ListView.builder(
+        itemBuilder: (context, index) {
+          return CheckboxListTile(
+            title: Text(tags[index]),
+            value: checkedItems[index],
+            onChanged: (bool? value) {
+              setState(() {
+                checkedItems[index] = value;
+              });
+            },
+          );
+        },
+        itemCount: tags.length,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+           _saveCheckedItems().then((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Tags saved to JSON file.'),
+              ),
+            );
+          }).catchError((error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to save checked items: $error'),
+              ),
+            );
+          });
+        },
+        child: Icon(Icons.check),
       ),
     );
   }

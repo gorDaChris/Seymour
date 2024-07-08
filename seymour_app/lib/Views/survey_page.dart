@@ -3,21 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: SurveyPage(),
-    );
-  }
-}
-
 class SurveyPage extends StatefulWidget {
   const SurveyPage({super.key});
 
@@ -62,6 +47,7 @@ class _SurveyPageState extends State<SurveyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: ListView.builder(
         itemBuilder: (context, index) {
           return CheckboxListTile(
@@ -80,7 +66,7 @@ class _SurveyPageState extends State<SurveyPage> {
         onPressed: () {
            _saveCheckedItems().then((_) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text('Tags saved to JSON file.'),
               ),
             );
@@ -92,7 +78,7 @@ class _SurveyPageState extends State<SurveyPage> {
             );
           });
         },
-        child: Icon(Icons.check),
+        child: const Icon(Icons.check),
       ),
     );
   }

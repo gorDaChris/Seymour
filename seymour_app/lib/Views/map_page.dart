@@ -5,6 +5,7 @@ import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
+import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
 
@@ -19,8 +20,8 @@ class _MapPageState extends State<MapPage> {
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
 
-  Coordinate? topAddress;
-  Coordinate? bottomAddress;
+  Coordinate? topCoordinate;
+  Coordinate? bottomCoordinate;
 
   double _turnsShowBottomTextFieldButton = 0;
   bool _showBottomTextField = false;
@@ -126,8 +127,13 @@ class _MapPageState extends State<MapPage> {
   double _showSideButtonsButtonTurns = 0;
 
   Future<void> _handleAtoBRequest() async {
-    topAddress = await getCoordinateFromAddress(topTextController.text);
-    bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+    topCoordinate = await getCoordinateFromAddress(topTextController.text);
+    bottomCoordinate =
+        await getCoordinateFromAddress(bottomTextController.text);
+
+    if (topCoordinate != null && bottomCoordinate != null) {
+      coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
+    }
   }
 
   Future<LocationData?> _currentLocation() async {

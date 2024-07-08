@@ -78,7 +78,7 @@ class _SurveyPageState extends State<SurveyPage> {
             );
           });
         },
-        child: const Icon(Icons.check),
+        child: const Icon(Icons.save),
       ),
     );
   }

@@ -39,7 +39,7 @@ class _NavigationPageState extends State<NavigationPage> {
     return Scaffold(
       body: SlidingUpPanel(
         isDraggable: false,
-        panelSnapping: false,
+        panelSnapping: true,
         body: Container(
           color: Colors.green,
           child: const Text(
@@ -60,8 +60,26 @@ class _NavigationPageState extends State<NavigationPage> {
         collapsed: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
+            Text(
+              "IMAGE",
+              textScaler: TextScaler.linear(2)
+            ),
             Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text(
+                  "INSTRUCTIONS",
+                  textScaler: TextScaler.linear(2)
+                ),
+                ElevatedButton(
+                  child: const Text(
+                    "Go back"
+                  ),
+                  onPressed: () {
+                    navigateToMapPage();
+                  }
+                )
+              ]
             )
           ]
         )

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
+import 'package:seymour_app/Views/navigation_page.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -20,6 +21,12 @@ class _MapPageState extends State<MapPage> {
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (context) => const SavePage()));
   }
+
+  void navigateToNavigationPage() {
+    Navigator.of(context)
+    .push(MaterialPageRoute(builder: (context) => const NavigationPage()));
+  }
+
 
   void _handleShowSideButtons() {
     _showAllSideButtons = !_showAllSideButtons;
@@ -50,7 +57,9 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            navigateToNavigationPage();
+          },
           icon: const Icon(Icons.navigation),
         ),
       ));

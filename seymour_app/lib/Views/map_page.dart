@@ -16,8 +16,8 @@ class _MapPageState extends State<MapPage> {
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
 
-  Coordinate? topAddress;
-  Coordinate? bottomAddress;
+  Coordinate? topCoordinate;
+  Coordinate? bottomCoordinate;
 
   double _turnsShowBottomTextFieldButton = 0;
   bool _showBottomTextField = false;
@@ -123,11 +123,12 @@ class _MapPageState extends State<MapPage> {
   double _showSideButtonsButtonTurns = 0;
 
   Future<void> _handleAtoBRequest() async {
-    topAddress = await getCoordinateFromAddress(topTextController.text);
-    bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+    topCoordinate = await getCoordinateFromAddress(topTextController.text);
+    bottomCoordinate =
+        await getCoordinateFromAddress(bottomTextController.text);
 
-    if (topAddress != null && bottomAddress != null) {
-      coordinatesToRoute([topAddress!, bottomAddress!], true);
+    if (topCoordinate != null && bottomCoordinate != null) {
+      coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
     }
   }
 

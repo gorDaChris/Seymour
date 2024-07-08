@@ -51,37 +51,38 @@ class _NavigationPageState extends State<NavigationPage> {
         // TODO: What are we even going to do for this?
         // TODO: Button that calls _hideDestinationMenu
         // TODO: Darkened background
-        panel: const Text(
-          "YOU'RE HERE",
-          textScaler: TextScaler.linear(2)
+        panel: Container(
+          color: Colors.grey,
+          child: const Text(
+            "YOU'RE HERE",
+            textScaler: TextScaler.linear(2)
+          )
         ),
         // These are the navigation instructions
         // TODO: Global button that calls _showDestinationMenu
-        collapsed: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              "IMAGE",
-              textScaler: TextScaler.linear(2)
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Text(
-                  "INSTRUCTIONS",
-                  textScaler: TextScaler.linear(2)
+        collapsed: Container(
+          color: Colors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                "IMAGE",
+                textScaler: TextScaler.linear(2)
+              ),
+              Text(
+                "INSTRUCTIONS",
+                textScaler: TextScaler.linear(2)
+              ),
+              ElevatedButton(
+                child: const Text(
+                  "Go back"
                 ),
-                ElevatedButton(
-                  child: const Text(
-                    "Go back"
-                  ),
-                  onPressed: () {
-                    navigateToMapPage();
-                  }
-                )
-              ]
-            )
-          ]
+                onPressed: () {
+                  navigateToMapPage();
+                }
+              )
+            ]
+          )
         )
       )
     );

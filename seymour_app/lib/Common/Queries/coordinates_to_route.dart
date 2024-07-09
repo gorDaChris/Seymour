@@ -28,8 +28,6 @@ Future<Route> coordinatesToRoute(
     "computeBestOrder": (!maintainOrder).toString()
   }));
 
-  log(response.body);
-
   var jsonObject = jsonDecode(response.body);
 
   return Route.fromJson(jsonObject["routes"][0]);

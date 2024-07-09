@@ -35,7 +35,6 @@ class Route {
   }
 
   List<Polyline<Object>> drawRoute() {
-    print("Drawing");
     List<Polyline<Object>> drawnRoads = [];
     for (Leg leg in legs) {
       drawnRoads.add(Polyline(

@@ -219,8 +219,9 @@ class _MapPageState extends State<MapPage> {
                               onSubmitted: (value) {
                                 if (_showBottomTextField) {
                                   _handleAtoBRequest();
-                                  // TODO: center onsubmitted when both are present
-                                  //       center avg of both or just 1
+                                } else {
+                                  // TODO: handle radius-mode requests
+                                  _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
                                 }
                               },
                               controller: topTextController,

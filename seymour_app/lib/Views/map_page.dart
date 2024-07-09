@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
@@ -24,6 +26,8 @@ class _MapPageState extends State<MapPage> {
 
   double _turnsShowBottomTextFieldButton = 0;
   bool _showBottomTextField = false;
+
+  static final MapController _mapController = MapController();
 
   void navigateToImportExportSavePage() {
     Navigator.of(context)
@@ -128,6 +132,25 @@ class _MapPageState extends State<MapPage> {
   Future<void> _handleAtoBRequest() async {
     topAddress = await getCoordinateFromAddress(topTextController.text);
     bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+
+    /* If only one text box is filled, then center the map on the only sight. */
+    if (topTextController.text.isEmpty ^ bottomTextController.text.isEmpty) {
+      if (topTextController.text.isEmpty) {
+        _mapController.move(LatLng(bottomAddress!.latitude, bottomAddress!.longitude), 12);
+      } else {
+        _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+      }
+    } 
+    /* If both places are entered, center the map on the average between them */
+    else if (topTextController.text.isNotEmpty && topTextController.text.isNotEmpty) {
+      LatLng center = LatLng(
+        (topAddress!.latitude + bottomAddress!.latitude) / 2, (topAddress!.longitude + bottomAddress!.longitude) / 2
+      );
+
+      double diff = sqrt(pow(topAddress!.latitude - bottomAddress!.latitude, 2) + pow(topAddress!.longitude - bottomAddress!.longitude, 2));
+      
+      _mapController.move(center, 18 / diff); 
+    }
   }
 
   Future<LocationData?> _currentLocation() async {
@@ -167,6 +190,7 @@ class _MapPageState extends State<MapPage> {
               if (snapchat.hasData) {
                 final LocationData currentLocation = snapchat.data;
                 return FlutterMap(
+                  mapController: _mapController,
                   options: MapOptions(
                     initialCenter: LatLng(currentLocation.latitude!, currentLocation.longitude!), 
                     initialZoom: 12,
@@ -199,6 +223,8 @@ class _MapPageState extends State<MapPage> {
                               onSubmitted: (value) {
                                 if (_showBottomTextField) {
                                   _handleAtoBRequest();
+                                  // TODO: center onsubmitted when both are present
+                                  //       center avg of both or just 1
                                 }
                               },
                               controller: topTextController,

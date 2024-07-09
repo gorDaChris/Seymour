@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
@@ -143,13 +141,11 @@ class _MapPageState extends State<MapPage> {
     } 
     /* If both places are entered, center the map on the average between them */
     else if (topTextController.text.isNotEmpty && topTextController.text.isNotEmpty) {
-      LatLng center = LatLng(
-        (topAddress!.latitude + bottomAddress!.latitude) / 2, (topAddress!.longitude + bottomAddress!.longitude) / 2
+      _mapController.fitCamera(CameraFit.bounds(
+        bounds: LatLngBounds(LatLng(topAddress!.latitude, topAddress!.longitude), LatLng(bottomAddress!.latitude, bottomAddress!.longitude)),
+        padding: const EdgeInsets.all(70),
+        )
       );
-
-      double diff = sqrt(pow(topAddress!.latitude - bottomAddress!.latitude, 2) + pow(topAddress!.longitude - bottomAddress!.longitude, 2));
-      
-      _mapController.move(center, 18 / diff); 
     }
   }
 

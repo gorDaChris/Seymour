@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
+import 'package:seymour_app/Common/Models/route.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import 'package:seymour_app/Views/map_page.dart';
@@ -18,6 +18,11 @@ class NavigationPage extends StatefulWidget {
 
 class _NavigationPageState extends State<NavigationPage> {
   PanelController _pc = new PanelController();
+
+  int instructionIndex = 1;
+
+  Instruction currentInstruction =
+      currentJourney.route!.guidance.instructions[1];
 
   void navigateToMapPage() {
     locationStreamSubscription.cancel();
@@ -37,6 +42,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   void interpretLocation(LocationData data) {
     displayUserLocationCircle(data);
+    changeCurrentInstructionIfNeeded(data);
   }
 
   void displayUserLocationCircle(LocationData data) {
@@ -48,6 +54,21 @@ class _NavigationPageState extends State<NavigationPage> {
           borderColor: Colors.red,
           borderStrokeWidth: 3);
     });
+  }
+
+  void changeCurrentInstructionIfNeeded(LocationData data) {
+    double userDistanceFromNextStepMeters = Distance().as(
+        LengthUnit.Meter,
+        LatLng(data.latitude!, data.longitude!),
+        currentInstruction.point.toLatLng());
+
+    if (userDistanceFromNextStepMeters <= 20) {
+      instructionIndex++;
+      setState(() {
+        currentInstruction =
+            currentJourney.route!.guidance.instructions[instructionIndex];
+      });
+    }
   }
 
   late StreamSubscription<LocationData> locationStreamSubscription;
@@ -63,6 +84,10 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   Polyline<Object> routeLine = Polyline(points: []);
+
+  String formatInstructionMessage(String message) {
+    return message.replaceAll("<street>", "").replaceAll("</street>", "");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,9 +142,11 @@ class _NavigationPageState extends State<NavigationPage> {
                     children: <Widget>[
                       Text("IMAGE"),
                       Column(children: <Widget>[
-                        Text("100ft - Turn left",
-                            textScaler: TextScaler.linear(2)),
-                        Text("Example Dr.", textScaler: TextScaler.linear(1.5))
+                        Text(
+                            formatInstructionMessage(
+                                currentInstruction.message),
+                            textScaler: TextScaler.linear(0.8)),
+                        // Text("Example Dr.", textScaler: TextScaler.linear(1.5))
                       ]),
                       Column(children: <Widget>[
                         ElevatedButton(

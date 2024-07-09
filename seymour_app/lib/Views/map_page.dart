@@ -173,8 +173,6 @@ class _MapPageState extends State<MapPage> {
         await getCoordinateFromAddress(bottomTextController.text);
 
     if (topCoordinate != null && bottomCoordinate != null) {
-      print("Coordintes Obtained");
-
       currentJourney.route =
           await coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
 

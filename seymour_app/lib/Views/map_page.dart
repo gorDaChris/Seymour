@@ -124,24 +124,26 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _handleSearchRequest() async {
     if (topTextController.text.isNotEmpty) {
-      topAddress = await getCoordinateFromAddress(topTextController.text);
+      topCoordinate = await getCoordinateFromAddress(topTextController.text);
       _mapController.move(
-          LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+          LatLng(topCoordinate!.latitude, topCoordinate!.longitude), 12);
     }
   }
 
   Future<void> _handleAtoBRequest() async {
-    topAddress = await getCoordinateFromAddress(topTextController.text);
-    bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+    topCoordinate = await getCoordinateFromAddress(topTextController.text);
+    bottomCoordinate =
+        await getCoordinateFromAddress(bottomTextController.text);
 
     /* If only one text box is filled, then center the map on the only sight. */
     if (topTextController.text.isEmpty ^ bottomTextController.text.isEmpty) {
       if (topTextController.text.isEmpty) {
         _mapController.move(
-            LatLng(bottomAddress!.latitude, bottomAddress!.longitude), 12);
+            LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude),
+            12);
       } else {
         _mapController.move(
-            LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+            LatLng(topCoordinate!.latitude, topCoordinate!.longitude), 12);
       }
     }
     /* If both places are entered, center the map on the average between them */
@@ -149,8 +151,8 @@ class _MapPageState extends State<MapPage> {
         topTextController.text.isNotEmpty) {
       _mapController.fitCamera(CameraFit.bounds(
         bounds: LatLngBounds(
-            LatLng(topAddress!.latitude, topAddress!.longitude),
-            LatLng(bottomAddress!.latitude, bottomAddress!.longitude)),
+            LatLng(topCoordinate!.latitude, topCoordinate!.longitude),
+            LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude)),
         padding: const EdgeInsets.all(70),
       ));
     }

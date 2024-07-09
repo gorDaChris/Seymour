@@ -121,6 +121,13 @@ class _MapPageState extends State<MapPage> {
   bool _showAllSideButtons = false;
   double _showSideButtonsButtonTurns = 0;
 
+  Future<void> _handleSearchRequest() async {
+    if (topTextController.text.isNotEmpty) {
+      topAddress = await getCoordinateFromAddress(topTextController.text);
+      _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+    }
+  }
+
   Future<void> _handleAtoBRequest() async {
     topAddress = await getCoordinateFromAddress(topTextController.text);
     bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
@@ -215,7 +222,7 @@ class _MapPageState extends State<MapPage> {
                                   _handleAtoBRequest();
                                 } else {
                                   // TODO: handle radius-mode requests
-                                  _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+                                  _handleSearchRequest();
                                 }
                               },
                               controller: topTextController,

@@ -11,19 +11,20 @@ class NavigationPage extends StatefulWidget {
 }
 
 class _NavigationPageState extends State<NavigationPage> {
+  PanelController _pc = new PanelController();
+
   void navigateToMapPage() {
     Navigator.of(context)
     .push(MaterialPageRoute(builder: (context) => const MapPage()));
   }
 
-  // TODO: SlidingUpPanel animates to different height
-  // TODO: For now just make it immediately open or close
-  void _showDestinationMenu() {
-
-  }
-
-  void _hideDestinationMenu() {
-
+  void _toggleDestinationMenu() {
+    if (_pc.isPanelOpen) {
+      _pc.close();
+    }
+    else {
+      _pc.open();
+    }
   }
 
   @override
@@ -31,15 +32,13 @@ class _NavigationPageState extends State<NavigationPage> {
     super.initState();
   }
 
-  // No clue if this will be used. Either a sanity check or animation safety
-  bool _atDestination = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SlidingUpPanel(
         isDraggable: false,
         panelSnapping: true,
+        controller: _pc,
         body: Container(
           color: Colors.green,
           child: const Text(
@@ -53,9 +52,21 @@ class _NavigationPageState extends State<NavigationPage> {
         // TODO: Darkened background
         panel: Container(
           color: Colors.grey,
-          child: const Text(
-            "YOU'RE HERE",
-            textScaler: TextScaler.linear(2)
+          child: Column(
+            children: <Widget>[
+              const Text(
+                "YOU'RE HERE",
+                textScaler: TextScaler.linear(2)
+              ),
+              ElevatedButton(
+                child: const Text(
+                  "Raise/lower demo"
+                ),
+                onPressed: () {
+                  _toggleDestinationMenu();
+                }
+              )
+            ]
           )
         ),
         // These are the navigation instructions
@@ -66,20 +77,39 @@ class _NavigationPageState extends State<NavigationPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
-                "IMAGE",
-                textScaler: TextScaler.linear(2)
+                "IMAGE"
               ),
-              Text(
-                "INSTRUCTIONS",
-                textScaler: TextScaler.linear(2)
+              Column(
+                children: <Widget>[
+                  Text(
+                    "100ft - Turn left",
+                    textScaler: TextScaler.linear(2)
+                  ),
+                  Text(
+                  "Example Dr.",
+                    textScaler: TextScaler.linear(1.5)
+                  )
+                ]
               ),
-              ElevatedButton(
-                child: const Text(
-                  "Go back"
-                ),
-                onPressed: () {
-                  navigateToMapPage();
-                }
+              Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    child: const Text(
+                      "Raise/lower demo"
+                    ),
+                    onPressed: () {
+                      _toggleDestinationMenu();
+                    }
+                  ),
+                  ElevatedButton(
+                    child: const Text(
+                      "Go back"
+                    ),
+                    onPressed: () {
+                      navigateToMapPage();
+                    }
+                  )
+                ]
               )
             ]
           )

@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:location/location.dart';
+// ignore: depend_on_referenced_packages
+import 'package:latlong2/latlong.dart';
+import 'package:seymour_app/Common/Models/coordinate.dart';
+import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
 
@@ -13,8 +19,13 @@ class _MapPageState extends State<MapPage> {
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
 
+  Coordinate? topAddress;
+  Coordinate? bottomAddress;
+
   double _turnsShowBottomTextFieldButton = 0;
   bool _showBottomTextField = false;
+
+  static final MapController _mapController = MapController();
 
   void navigateToImportExportSavePage() {
     Navigator.of(context)
@@ -110,6 +121,59 @@ class _MapPageState extends State<MapPage> {
   bool _showAllSideButtons = false;
   double _showSideButtonsButtonTurns = 0;
 
+  Future<void> _handleSearchRequest() async {
+    if (topTextController.text.isNotEmpty) {
+      topAddress = await getCoordinateFromAddress(topTextController.text);
+      _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+    }
+  }
+
+  Future<void> _handleAtoBRequest() async {
+    topAddress = await getCoordinateFromAddress(topTextController.text);
+    bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+
+    /* If only one text box is filled, then center the map on the only sight. */
+    if (topTextController.text.isEmpty ^ bottomTextController.text.isEmpty) {
+      if (topTextController.text.isEmpty) {
+        _mapController.move(LatLng(bottomAddress!.latitude, bottomAddress!.longitude), 12);
+      } else {
+        _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+      }
+    } 
+    /* If both places are entered, center the map on the average between them */
+    else if (topTextController.text.isNotEmpty && topTextController.text.isNotEmpty) {
+      _mapController.fitCamera(CameraFit.bounds(
+        bounds: LatLngBounds(LatLng(topAddress!.latitude, topAddress!.longitude), LatLng(bottomAddress!.latitude, bottomAddress!.longitude)),
+        padding: const EdgeInsets.all(70),
+        )
+      );
+    }
+  }
+
+  Future<LocationData?> _currentLocation() async {
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+ 
+    Location location = Location();
+ 
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return null;
+      }
+    }
+ 
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return null;
+      }
+    }
+    return await location.getLocation();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,9 +181,26 @@ class _MapPageState extends State<MapPage> {
           backgroundChild: Container(
         color: Colors.green,
         child: Stack(children: [
-          const Text(
-            "MAP",
-            textScaler: TextScaler.linear(20),
+          FutureBuilder<LocationData?>(
+            future: _currentLocation(),
+            builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
+              if (snapchat.hasData) {
+                final LocationData currentLocation = snapchat.data;
+                return FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter: LatLng(currentLocation.latitude!, currentLocation.longitude!), 
+                    initialZoom: 12,
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    ),
+                  ]
+                );
+              }
+              return const Center(child: CircularProgressIndicator());
+            }
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,6 +217,14 @@ class _MapPageState extends State<MapPage> {
                           width: MediaQuery.of(context).size.width * 0.8,
                           child: Card(
                             child: TextField(
+                              onSubmitted: (value) {
+                                if (_showBottomTextField) {
+                                  _handleAtoBRequest();
+                                } else {
+                                  // TODO: handle radius-mode requests
+                                  _handleSearchRequest();
+                                }
+                              },
                               controller: topTextController,
                               decoration: InputDecoration(
                                   hintText: _showBottomTextField
@@ -154,6 +243,11 @@ class _MapPageState extends State<MapPage> {
                             width: MediaQuery.of(context).size.width * 0.8,
                             child: Card(
                               child: TextField(
+                                onSubmitted: (value) {
+                                  if (_showBottomTextField) {
+                                    _handleAtoBRequest();
+                                  }
+                                },
                                 controller: bottomTextController,
                                 decoration: const InputDecoration(
                                     hintText: "Destination"),

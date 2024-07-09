@@ -210,6 +210,7 @@ class _MapPageState extends State<MapPage> {
                 if (snapchat.hasData) {
                   final LocationData currentLocation = snapchat.data;
                   return FlutterMap(
+                      mapController: _mapController,
                       options: MapOptions(
                         initialCenter: LatLng(currentLocation.latitude!,
                             currentLocation.longitude!),

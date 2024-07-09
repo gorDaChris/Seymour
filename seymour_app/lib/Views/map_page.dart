@@ -5,6 +5,7 @@ import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
+import 'package:seymour_app/Common/Queries/sights_by_radius.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
 
@@ -18,6 +19,8 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
+
+  late LatLng center; 
 
   Coordinate? topAddress;
   Coordinate? bottomAddress;
@@ -41,7 +44,10 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            // TODO: Note this is TEMPORARY BEHAVIOR!
+            getNearbySights();
+          },
           icon: const Icon(Icons.route),
         ),
       ));
@@ -122,10 +128,12 @@ class _MapPageState extends State<MapPage> {
   double _showSideButtonsButtonTurns = 0;
 
   Future<void> _handleSearchRequest() async {
-    if (topTextController.text.isNotEmpty) {
-      topAddress = await getCoordinateFromAddress(topTextController.text);
-      _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
-    }
+    if (topTextController.text.isEmpty) return;
+
+    topAddress = await getCoordinateFromAddress(topTextController.text);
+    center = LatLng(topAddress!.latitude, topAddress!.longitude);
+    _mapController.move(center, 12);
+    
   }
 
   Future<void> _handleAtoBRequest() async {
@@ -135,19 +143,26 @@ class _MapPageState extends State<MapPage> {
     /* If only one text box is filled, then center the map on the only sight. */
     if (topTextController.text.isEmpty ^ bottomTextController.text.isEmpty) {
       if (topTextController.text.isEmpty) {
-        _mapController.move(LatLng(bottomAddress!.latitude, bottomAddress!.longitude), 12);
+        center = LatLng(bottomAddress!.latitude, bottomAddress!.longitude);
       } else {
-        _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+        center = LatLng(topAddress!.latitude, topAddress!.longitude);
       }
+      _mapController.move(center, 12);
     } 
     /* If both places are entered, center the map on the average between them */
     else if (topTextController.text.isNotEmpty && topTextController.text.isNotEmpty) {
+      LatLngBounds bounds = LatLngBounds(LatLng(topAddress!.latitude, topAddress!.longitude), LatLng(bottomAddress!.latitude, bottomAddress!.longitude));
+      center = bounds.center;
       _mapController.fitCamera(CameraFit.bounds(
-        bounds: LatLngBounds(LatLng(topAddress!.latitude, topAddress!.longitude), LatLng(bottomAddress!.latitude, bottomAddress!.longitude)),
+        bounds: bounds,
         padding: const EdgeInsets.all(70),
         )
       );
     }
+  }
+
+  Future<void> getNearbySights() async {
+    getSights(center, 10);
   }
 
   Future<LocationData?> _currentLocation() async {

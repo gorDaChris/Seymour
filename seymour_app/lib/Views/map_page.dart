@@ -4,10 +4,13 @@ import 'package:location/location.dart';
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
+import 'package:seymour_app/Common/Models/journey.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
+
+Journey currentJourney = Journey();
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -132,16 +135,25 @@ class _MapPageState extends State<MapPage> {
         await getCoordinateFromAddress(bottomTextController.text);
 
     if (topCoordinate != null && bottomCoordinate != null) {
-      coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
+      print("Coordintes Obtained");
+
+      currentJourney.route =
+          await coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
+
+      setState(() {
+        routeLine = currentJourney.route!.drawRoute().first;
+      });
     }
   }
+
+  Polyline<Object> routeLine = Polyline(points: []);
 
   Future<LocationData?> _currentLocation() async {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
- 
+
     Location location = Location();
- 
+
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
@@ -149,7 +161,7 @@ class _MapPageState extends State<MapPage> {
         return null;
       }
     }
- 
+
     permissionGranted = await location.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
@@ -168,25 +180,26 @@ class _MapPageState extends State<MapPage> {
         color: Colors.green,
         child: Stack(children: [
           FutureBuilder<LocationData?>(
-            future: _currentLocation(),
-            builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
-              if (snapchat.hasData) {
-                final LocationData currentLocation = snapchat.data;
-                return FlutterMap(
-                  options: MapOptions(
-                    initialCenter: LatLng(currentLocation.latitude!, currentLocation.longitude!), 
-                    initialZoom: 12,
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    ),
-                  ]
-                );
-              }
-              return const Center(child: CircularProgressIndicator());
-            }
-          ),
+              future: _currentLocation(),
+              builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
+                if (snapchat.hasData) {
+                  final LocationData currentLocation = snapchat.data;
+                  return FlutterMap(
+                      options: MapOptions(
+                        initialCenter: LatLng(currentLocation.latitude!,
+                            currentLocation.longitude!),
+                        initialZoom: 12,
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        ),
+                        PolylineLayer(polylines: [routeLine]),
+                      ]);
+                }
+                return const Center(child: CircularProgressIndicator());
+              }),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

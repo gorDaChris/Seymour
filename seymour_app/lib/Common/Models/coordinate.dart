@@ -1,3 +1,5 @@
+import 'package:latlong2/latlong.dart';
+
 class Coordinate {
   double latitude;
   double longitude;
@@ -14,5 +16,15 @@ class Coordinate {
   @override
   String toString() {
     return "Latitude: $latitude, Longitude: $longitude";
+  }
+
+  LatLng toLatLng() {
+    return LatLng(latitude, longitude);
+  }
+}
+
+extension ToCoord on LatLng {
+  Coordinate toCoordinate() {
+    return Coordinate(latitude, longitude);
   }
 }

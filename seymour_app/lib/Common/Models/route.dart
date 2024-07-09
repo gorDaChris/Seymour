@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 
 /*
@@ -30,6 +32,20 @@ class Route {
           (json['sections'] as List).map((i) => Section.fromJson(i)).toList(),
       guidance: Guidance.fromJson(json['guidance']),
     );
+  }
+
+  List<Polyline<Object>> drawRoute() {
+    print("Drawing");
+    List<Polyline<Object>> drawnRoads = [];
+    for (Leg leg in legs) {
+      drawnRoads.add(Polyline(
+          // useStrokeWidthInMeter: true,
+          strokeWidth: 8,
+          points: leg.points.map((coord) => coord.toLatLng()).toList(),
+          color: Colors.black));
+    }
+
+    return drawnRoads;
   }
 }
 
@@ -123,7 +139,7 @@ class Instruction {
   final Coordinate point;
   final int pointIndex;
   final String instructionType;
-  final String street;
+  final String? street;
   final bool possibleCombineWithNext;
   final String drivingSide;
   final String maneuver;

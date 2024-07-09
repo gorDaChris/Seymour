@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
@@ -26,6 +27,8 @@ Future<Route> coordinatesToRoute(
     "subscription-key": await rootBundle.loadString("DoNotPutIntoGitAzure.txt"),
     "computeBestOrder": (!maintainOrder).toString()
   }));
+
+  log(response.body);
 
   var jsonObject = jsonDecode(response.body);
 

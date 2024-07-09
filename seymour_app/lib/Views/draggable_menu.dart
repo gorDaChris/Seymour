@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:seymour_app/Views/survey_page.dart';
 
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -16,6 +17,11 @@ class DraggableMenu extends StatefulWidget {
 
 class _DraggableMenuState extends State<DraggableMenu> {
   double radius = 0.5; //TODO: talk about whether we should use diameter instead
+
+  void navigateToSurveyPage() {
+    Navigator.of(context)
+      .push(MaterialPageRoute(builder: (context) => const SurveyPage()));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +43,9 @@ class _DraggableMenuState extends State<DraggableMenu> {
         children: [
           ElevatedButton(
             child: const Text("Adjust Filters"),
-            onPressed: () {},
+            onPressed: () {
+              navigateToSurveyPage();
+            },
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,

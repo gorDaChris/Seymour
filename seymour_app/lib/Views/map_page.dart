@@ -13,6 +13,30 @@ import 'package:seymour_app/Views/navigation_page.dart';
 
 Journey currentJourney = Journey();
 
+Future<LocationData?> currentLocation() async {
+  bool serviceEnabled;
+  PermissionStatus permissionGranted;
+
+  Location location = Location();
+
+  serviceEnabled = await location.serviceEnabled();
+  if (!serviceEnabled) {
+    serviceEnabled = await location.requestService();
+    if (!serviceEnabled) {
+      return null;
+    }
+  }
+
+  permissionGranted = await location.hasPermission();
+  if (permissionGranted == PermissionStatus.denied) {
+    permissionGranted = await location.requestPermission();
+    if (permissionGranted != PermissionStatus.granted) {
+      return null;
+    }
+  }
+  return await location.getLocation();
+}
+
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -39,9 +63,8 @@ class _MapPageState extends State<MapPage> {
 
   void navigateToNavigationPage() {
     Navigator.of(context)
-    .push(MaterialPageRoute(builder: (context) => const NavigationPage()));
+        .push(MaterialPageRoute(builder: (context) => const NavigationPage()));
   }
-
 
   void _handleShowSideButtons() {
     _showAllSideButtons = !_showAllSideButtons;
@@ -182,30 +205,6 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Future<LocationData?> _currentLocation() async {
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-
-    Location location = Location();
-
-    serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return null;
-      }
-    }
-
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return null;
-      }
-    }
-    return await location.getLocation();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -214,7 +213,7 @@ class _MapPageState extends State<MapPage> {
         color: Colors.green,
         child: Stack(children: [
           FutureBuilder<LocationData?>(
-              future: _currentLocation(),
+              future: currentLocation(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
                 if (snapchat.hasData) {
                   final LocationData currentLocation = snapchat.data;

@@ -29,6 +29,8 @@ class _MapPageState extends State<MapPage> {
   double _turnsShowBottomTextFieldButton = 0;
   bool _showBottomTextField = false;
 
+  static final MapController _mapController = MapController();
+
   void navigateToImportExportSavePage() {
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (context) => const SavePage()));
@@ -119,15 +121,19 @@ class _MapPageState extends State<MapPage> {
 
   final List<Widget> _sideButtons = [];
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
   final _listKey = GlobalKey<AnimatedListState>();
   bool _showAllSideButtons = false;
   double _showSideButtonsButtonTurns = 0;
+
+  Future<void> _handleSearchRequest() async {
+    if (topTextController.text.isNotEmpty) {
+      topCoordinate = await getCoordinateFromAddress(topTextController.text);
+      _mapController.move(
+          LatLng(topCoordinate!.latitude, topCoordinate!.longitude), 12);
+    }
+  }
+
+  Polyline<Object> routeLine = Polyline(points: []);
 
   Future<void> _handleAtoBRequest() async {
     topCoordinate = await getCoordinateFromAddress(topTextController.text);
@@ -144,9 +150,28 @@ class _MapPageState extends State<MapPage> {
         routeLine = currentJourney.route!.drawRoute().first;
       });
     }
+    /* If only one text box is filled, then center the map on the only sight. */
+    if (topTextController.text.isEmpty ^ bottomTextController.text.isEmpty) {
+      if (topTextController.text.isEmpty) {
+        _mapController.move(
+            LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude),
+            12);
+      } else {
+        _mapController.move(
+            LatLng(topCoordinate!.latitude, topCoordinate!.longitude), 12);
+      }
+    }
+    /* If both places are entered, center the map on the average between them */
+    else if (topTextController.text.isNotEmpty &&
+        topTextController.text.isNotEmpty) {
+      _mapController.fitCamera(CameraFit.bounds(
+        bounds: LatLngBounds(
+            LatLng(topCoordinate!.latitude, topCoordinate!.longitude),
+            LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude)),
+        padding: const EdgeInsets.all(70),
+      ));
+    }
   }
-
-  Polyline<Object> routeLine = Polyline(points: []);
 
   Future<LocationData?> _currentLocation() async {
     bool serviceEnabled;
@@ -207,7 +232,7 @@ class _MapPageState extends State<MapPage> {
               Center(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       children: [
@@ -218,6 +243,9 @@ class _MapPageState extends State<MapPage> {
                               onSubmitted: (value) {
                                 if (_showBottomTextField) {
                                   _handleAtoBRequest();
+                                } else {
+                                  // TODO: handle radius-mode requests
+                                  _handleSearchRequest();
                                 }
                               },
                               controller: topTextController,
@@ -252,20 +280,23 @@ class _MapPageState extends State<MapPage> {
                         )
                       ],
                     ),
-                    AnimatedRotation(
-                      turns: _turnsShowBottomTextFieldButton,
-                      duration: const Duration(milliseconds: 400),
-                      child: Card(
-                        child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _showBottomTextField = !_showBottomTextField;
-                                _turnsShowBottomTextFieldButton +=
-                                    0.25 * (_showBottomTextField ? -1 : 1);
-                              });
-                            },
-                            icon:
-                                const Icon(Icons.keyboard_arrow_left_outlined)),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: AnimatedRotation(
+                        turns: _turnsShowBottomTextFieldButton,
+                        duration: const Duration(milliseconds: 400),
+                        child: Card(
+                          child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _showBottomTextField = !_showBottomTextField;
+                                  _turnsShowBottomTextFieldButton +=
+                                      0.25 * (_showBottomTextField ? -1 : 1);
+                                });
+                              },
+                              icon: const Icon(
+                                  Icons.keyboard_arrow_left_outlined)),
+                        ),
                       ),
                     ),
                   ],
@@ -274,7 +305,7 @@ class _MapPageState extends State<MapPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: SizedBox(
-                  width: 65,
+                  width: 56,
                   height: MediaQuery.of(context).size.height * 0.4,
                   child: Column(
                     children: [
@@ -288,10 +319,9 @@ class _MapPageState extends State<MapPage> {
                             )),
                       ),
                       SizedBox(
-                        width: 65,
                         height: MediaQuery.of(context).size.height * 0.3,
                         child: AnimatedList(
-                          padding: const EdgeInsets.all(5),
+                          padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
                           key: _listKey,
                           initialItemCount: 0,
                           itemBuilder: (context, index, animation) {

@@ -42,5 +42,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+ios/Runner/GeneratedPluginRegistrant.m
+macos/Flutter/GeneratedPluginRegistrant.swift
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+
+
 #Secrets
 DoNotPutIntoGit*.txt

@@ -201,10 +201,11 @@ class _MapPageState extends State<MapPage> {
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
               if (snapchat.hasData) {
                 final LocationData currentLocation = snapchat.data;
+                center = LatLng(currentLocation.latitude!, currentLocation.longitude!);
                 return FlutterMap(
                   mapController: _mapController,
                   options: MapOptions(
-                    initialCenter: LatLng(currentLocation.latitude!, currentLocation.longitude!), 
+                    initialCenter: center,
                     initialZoom: 12,
                   ),
                   children: [

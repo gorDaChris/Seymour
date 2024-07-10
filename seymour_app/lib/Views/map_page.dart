@@ -17,6 +17,8 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  bool firstBuild = true;
+
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
 
@@ -131,6 +133,9 @@ class _MapPageState extends State<MapPage> {
     if (topTextController.text.isEmpty) return;
 
     topAddress = await getCoordinateFromAddress(topTextController.text);
+
+    if (topAddress == null) return;
+  
     center = LatLng(topAddress!.latitude, topAddress!.longitude);
     _mapController.move(center, 12);
     
@@ -139,6 +144,8 @@ class _MapPageState extends State<MapPage> {
   Future<void> _handleAtoBRequest() async {
     topAddress = await getCoordinateFromAddress(topTextController.text);
     bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+
+    if (topAddress == null || bottomAddress == null) return;
 
     /* If only one text box is filled, then center the map on the only sight. */
     if (topTextController.text.isEmpty ^ bottomTextController.text.isEmpty) {
@@ -162,7 +169,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> getNearbySights() async {
-    getSights(center, 10);
+    // TODO: fill in radius
+    getSights(center, 50);
   }
 
   Future<LocationData?> _currentLocation() async {
@@ -199,9 +207,25 @@ class _MapPageState extends State<MapPage> {
           FutureBuilder<LocationData?>(
             future: _currentLocation(),
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
-              if (snapchat.hasData) {
-                final LocationData currentLocation = snapchat.data;
-                center = LatLng(currentLocation.latitude!, currentLocation.longitude!);
+              if (firstBuild) {
+                if (snapchat.hasData) {
+                  final LocationData currentLocation = snapchat.data;
+                  center = LatLng(currentLocation.latitude!, currentLocation.longitude!);
+                  firstBuild = false;
+                  return FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: center,
+                      initialZoom: 12,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      ),
+                    ]
+                  );
+                }
+              } else {
                 return FlutterMap(
                   mapController: _mapController,
                   options: MapOptions(

@@ -64,10 +64,17 @@ class _NavigationPageState extends State<NavigationPage> {
 
     if (userDistanceFromNextStepMeters <= 20) {
       instructionIndex++;
+      if (instructionIndex >=
+          currentJourney.route!.guidance.instructions.length) {
+        //Final destination reached!
+        return;
+      }
+
       setState(() {
         currentInstruction =
             currentJourney.route!.guidance.instructions[instructionIndex];
       });
+      print(currentInstruction.maneuver);
     }
   }
 
@@ -85,9 +92,19 @@ class _NavigationPageState extends State<NavigationPage> {
 
   Polyline<Object> routeLine = Polyline(points: []);
 
-  String formatInstructionMessage(String message) {
-    return message.replaceAll("<street>", "").replaceAll("</street>", "");
+  String? formatInstructionMessage(String? message) {
+    return message?.replaceAll("<street>", "").replaceAll("</street>", "");
   }
+
+  Map<String, IconData> maneuverIcons = {
+    "TURN_LEFT": Icons.turn_left,
+    "STRAIGHT": Icons.straight,
+    "BEAR_LEFT": Icons.turn_slight_left,
+    "ROUNDABOUT_LEFT": Icons.roundabout_left,
+    "TURN_RIGHT": Icons.turn_right,
+    "BEAR_RIGHT": Icons.turn_slight_right,
+    "ROUNDABOUT_Right": Icons.roundabout_right
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -140,21 +157,27 @@ class _NavigationPageState extends State<NavigationPage> {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text("IMAGE"),
-                      Column(children: <Widget>[
-                        Text(
-                            formatInstructionMessage(
-                                currentInstruction.message),
-                            textScaler: TextScaler.linear(0.8)),
-                        // Text("Example Dr.", textScaler: TextScaler.linear(1.5))
-                      ]),
-                      Column(children: <Widget>[
-                        ElevatedButton(
-                            child: const Text("Go back"),
-                            onPressed: () {
-                              navigateToMapPage();
-                            })
-                      ])
+                      Icon(
+                        maneuverIcons[currentInstruction.maneuver] ??
+                            Icons.error,
+                        size: 40,
+                      ),
+                      Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                                formatInstructionMessage(
+                                        currentInstruction.street) ??
+                                    "",
+                                textScaler: TextScaler.linear(1.2)),
+
+                            // Text("Example Dr.", textScaler: TextScaler.linear(1.5))
+                          ]),
+                      ElevatedButton(
+                          child: const Text("Go back"),
+                          onPressed: () {
+                            navigateToMapPage();
+                          })
                     ]))));
   }
 }

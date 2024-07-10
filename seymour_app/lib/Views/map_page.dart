@@ -4,9 +4,13 @@ import 'package:location/location.dart';
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
+import 'package:seymour_app/Common/Models/journey.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
+import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
+
+Journey currentJourney = Journey();
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -19,8 +23,8 @@ class _MapPageState extends State<MapPage> {
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
 
-  Coordinate? topAddress;
-  Coordinate? bottomAddress;
+  Coordinate? topCoordinate;
+  Coordinate? bottomCoordinate;
 
   double _turnsShowBottomTextFieldButton = 0;
   bool _showBottomTextField = false;
@@ -123,39 +127,58 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _handleSearchRequest() async {
     if (topTextController.text.isNotEmpty) {
-      topAddress = await getCoordinateFromAddress(topTextController.text);
-      _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+      topCoordinate = await getCoordinateFromAddress(topTextController.text);
+      _mapController.move(
+          LatLng(topCoordinate!.latitude, topCoordinate!.longitude), 12);
     }
   }
 
-  Future<void> _handleAtoBRequest() async {
-    topAddress = await getCoordinateFromAddress(topTextController.text);
-    bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+  Polyline<Object> routeLine = Polyline(points: []);
 
+  Future<void> _handleAtoBRequest() async {
+    topCoordinate = await getCoordinateFromAddress(topTextController.text);
+    bottomCoordinate =
+        await getCoordinateFromAddress(bottomTextController.text);
+
+    if (topCoordinate != null && bottomCoordinate != null) {
+      print("Coordintes Obtained");
+
+      currentJourney.route =
+          await coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
+
+      setState(() {
+        routeLine = currentJourney.route!.drawRoute().first;
+      });
+    }
     /* If only one text box is filled, then center the map on the only sight. */
     if (topTextController.text.isEmpty ^ bottomTextController.text.isEmpty) {
       if (topTextController.text.isEmpty) {
-        _mapController.move(LatLng(bottomAddress!.latitude, bottomAddress!.longitude), 12);
+        _mapController.move(
+            LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude),
+            12);
       } else {
-        _mapController.move(LatLng(topAddress!.latitude, topAddress!.longitude), 12);
+        _mapController.move(
+            LatLng(topCoordinate!.latitude, topCoordinate!.longitude), 12);
       }
-    } 
+    }
     /* If both places are entered, center the map on the average between them */
-    else if (topTextController.text.isNotEmpty && topTextController.text.isNotEmpty) {
+    else if (topTextController.text.isNotEmpty &&
+        topTextController.text.isNotEmpty) {
       _mapController.fitCamera(CameraFit.bounds(
-        bounds: LatLngBounds(LatLng(topAddress!.latitude, topAddress!.longitude), LatLng(bottomAddress!.latitude, bottomAddress!.longitude)),
+        bounds: LatLngBounds(
+            LatLng(topCoordinate!.latitude, topCoordinate!.longitude),
+            LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude)),
         padding: const EdgeInsets.all(70),
-        )
-      );
+      ));
     }
   }
 
   Future<LocationData?> _currentLocation() async {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
- 
+
     Location location = Location();
- 
+
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
@@ -163,7 +186,7 @@ class _MapPageState extends State<MapPage> {
         return null;
       }
     }
- 
+
     permissionGranted = await location.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
@@ -182,26 +205,27 @@ class _MapPageState extends State<MapPage> {
         color: Colors.green,
         child: Stack(children: [
           FutureBuilder<LocationData?>(
-            future: _currentLocation(),
-            builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
-              if (snapchat.hasData) {
-                final LocationData currentLocation = snapchat.data;
-                return FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: LatLng(currentLocation.latitude!, currentLocation.longitude!), 
-                    initialZoom: 12,
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    ),
-                  ]
-                );
-              }
-              return const Center(child: CircularProgressIndicator());
-            }
-          ),
+              future: _currentLocation(),
+              builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
+                if (snapchat.hasData) {
+                  final LocationData currentLocation = snapchat.data;
+                  return FlutterMap(
+                      mapController: _mapController,
+                      options: MapOptions(
+                        initialCenter: LatLng(currentLocation.latitude!,
+                            currentLocation.longitude!),
+                        initialZoom: 12,
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        ),
+                        PolylineLayer(polylines: [routeLine]),
+                      ]);
+                }
+                return const Center(child: CircularProgressIndicator());
+              }),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

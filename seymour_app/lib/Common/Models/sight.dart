@@ -5,14 +5,18 @@ import 'package:flutter_overpass/flutter_overpass.dart';
 /// WIP
 ///
 class Sight {
-  String name;
-  Tag tag; // Temporary
-  Coordinate coordinate;
+  final String _name;
+  final Tag _tag; // WIP
+  final Coordinate _coordinate;
 
-  Sight(this.name, this.coordinate, this.tag);
+  Sight(this._name, this._coordinate, this._tag);
 
   @override
   String toString() {
-    return "Name: $name, Coordinate: $coordinate";
+    return "Name: $_name, Coordinate: $_coordinate";
+  }
+
+  String name() {
+    return _name;
   }
 }

@@ -4,7 +4,7 @@ import 'package:location/location.dart';
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
-import 'package:seymour_app/Common/Models/sight.dart';
+import 'package:seymour_app/Common/Models/current_journey.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Common/Queries/sights_by_radius.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
@@ -20,8 +20,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   bool firstBuild = true;
 
-  List<Sight> sights = [];
-  List<Sight> filteredSights = [];
+  CurrentJourney currentJourney = CurrentJourney();
 
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
@@ -173,9 +172,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> getNearbySights() async {
-    sights.clear();
-    sights.addAll(await getSights(center, 50)); // TODO: radius
-    // TODO: filter sights
+    // TODO: filter sights & store filtered list
+    currentJourney.setSights(await getSights(center, 50));
   }
 
   Future<LocationData?> _currentLocation() async {

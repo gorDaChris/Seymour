@@ -15,6 +15,8 @@ import 'package:seymour_app/Views/navigation_page.dart';
 
 Journey currentJourney = Journey();
 
+const STARTING_MILES_RADIUS = 0.5;
+
 Future<LocationData?> currentLocation() async {
   bool serviceEnabled;
   PermissionStatus permissionGranted;
@@ -223,7 +225,10 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> getNearbySights() async {
     // TODO: filter sights & store filtered list
-    currentJourney.setSights(await getSights(center, 50));
+    const METERS_IN_A_MILE = 1609.34;
+
+    currentJourney
+        .setSights(await getSights(center, radiusInMiles * METERS_IN_A_MILE));
   }
 
   Future<LocationData?> _currentLocation() async {
@@ -250,169 +255,176 @@ class _MapPageState extends State<MapPage> {
     return await location.getLocation();
   }
 
+  double radiusInMiles = STARTING_MILES_RADIUS;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: DraggableMenu(
+          onRadiusChanged: (radiusMiles) {
+            radiusInMiles = radiusMiles;
+          },
           backgroundChild: Container(
-        color: Colors.green,
-        child: Stack(children: [
-          FutureBuilder<LocationData?>(
-              future: _currentLocation(),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
-                if (firstBuild) {
-                  if (snapchat.hasData) {
-                    final LocationData currentLocation = snapchat.data;
-                    center = LatLng(
-                        currentLocation.latitude!, currentLocation.longitude!);
-                    firstBuild = false;
-                    return FlutterMap(
-                        mapController: _mapController,
-                        options: MapOptions(
-                          initialCenter: center,
-                          initialZoom: 12,
-                        ),
-                        children: [
-                          TileLayer(
-                            urlTemplate:
-                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                          ),
-                          PolylineLayer(polylines: [routeLine]),
-                        ]);
-                  }
-                } else {
-                  return FlutterMap(
-                      mapController: _mapController,
-                      options: MapOptions(
-                        initialCenter: center,
-                        initialZoom: 12,
-                      ),
-                      children: [
-                        TileLayer(
-                          urlTemplate:
-                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        ),
-                        PolylineLayer(polylines: [routeLine]),
-                      ]);
-                }
-                return const Center(child: CircularProgressIndicator());
-              }),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(padding: EdgeInsets.all(30)),
-              Center(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.8,
-                          child: Card(
-                            child: TextField(
-                              onSubmitted: (value) {
-                                if (_showBottomTextField) {
-                                  _handleAtoBRequest();
-                                } else {
-                                  // TODO: handle radius-mode requests
-                                  _handleSearchRequest();
-                                }
-                              },
-                              controller: topTextController,
-                              decoration: InputDecoration(
-                                  hintText: _showBottomTextField
-                                      ? "Start of route"
-                                      : "Center of route"),
+            color: Colors.green,
+            child: Stack(children: [
+              FutureBuilder<LocationData?>(
+                  future: _currentLocation(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
+                    if (firstBuild) {
+                      if (snapchat.hasData) {
+                        final LocationData currentLocation = snapchat.data;
+                        center = LatLng(currentLocation.latitude!,
+                            currentLocation.longitude!);
+                        firstBuild = false;
+                        return FlutterMap(
+                            mapController: _mapController,
+                            options: MapOptions(
+                              initialCenter: center,
+                              initialZoom: 12,
                             ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              ),
+                              PolylineLayer(polylines: [routeLine]),
+                            ]);
+                      }
+                    } else {
+                      return FlutterMap(
+                          mapController: _mapController,
+                          options: MapOptions(
+                            initialCenter: center,
+                            initialZoom: 12,
                           ),
-                        ),
-                        Visibility(
-                          maintainAnimation: true,
-                          maintainState: true,
-                          maintainSize: true,
-                          visible: _showBottomTextField,
-                          child: Container(
-                            transformAlignment: Alignment.centerLeft,
-                            width: MediaQuery.of(context).size.width * 0.8,
-                            child: Card(
-                              child: TextField(
-                                onSubmitted: (value) {
-                                  if (_showBottomTextField) {
-                                    _handleAtoBRequest();
-                                  }
-                                },
-                                controller: bottomTextController,
-                                decoration: const InputDecoration(
-                                    hintText: "Destination"),
+                          children: [
+                            TileLayer(
+                              urlTemplate:
+                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            ),
+                            PolylineLayer(polylines: [routeLine]),
+                          ]);
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  }),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(padding: EdgeInsets.all(30)),
+                  Center(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              child: Card(
+                                child: TextField(
+                                  onSubmitted: (value) {
+                                    if (_showBottomTextField) {
+                                      _handleAtoBRequest();
+                                    } else {
+                                      // TODO: handle radius-mode requests
+                                      _handleSearchRequest();
+                                    }
+                                  },
+                                  controller: topTextController,
+                                  decoration: InputDecoration(
+                                      hintText: _showBottomTextField
+                                          ? "Start of route"
+                                          : "Center of route"),
+                                ),
                               ),
                             ),
+                            Visibility(
+                              maintainAnimation: true,
+                              maintainState: true,
+                              maintainSize: true,
+                              visible: _showBottomTextField,
+                              child: Container(
+                                transformAlignment: Alignment.centerLeft,
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                child: Card(
+                                  child: TextField(
+                                    onSubmitted: (value) {
+                                      if (_showBottomTextField) {
+                                        _handleAtoBRequest();
+                                      }
+                                    },
+                                    controller: bottomTextController,
+                                    decoration: const InputDecoration(
+                                        hintText: "Destination"),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: AnimatedRotation(
+                            turns: _turnsShowBottomTextFieldButton,
+                            duration: const Duration(milliseconds: 400),
+                            child: Card(
+                              child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showBottomTextField =
+                                          !_showBottomTextField;
+                                      _turnsShowBottomTextFieldButton += 0.25 *
+                                          (_showBottomTextField ? -1 : 1);
+                                    });
+                                  },
+                                  icon: const Icon(
+                                      Icons.keyboard_arrow_left_outlined)),
+                            ),
                           ),
-                        )
+                        ),
                       ],
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: AnimatedRotation(
-                        turns: _turnsShowBottomTextFieldButton,
-                        duration: const Duration(milliseconds: 400),
-                        child: Card(
-                          child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  _showBottomTextField = !_showBottomTextField;
-                                  _turnsShowBottomTextFieldButton +=
-                                      0.25 * (_showBottomTextField ? -1 : 1);
-                                });
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(
+                      width: 56,
+                      height: MediaQuery.of(context).size.height * 0.4,
+                      child: Column(
+                        children: [
+                          Card(
+                            child: IconButton(
+                                onPressed: _handleShowSideButtons,
+                                icon: AnimatedRotation(
+                                  turns: _showSideButtonsButtonTurns,
+                                  duration: const Duration(milliseconds: 200),
+                                  child: const Icon(Icons.add),
+                                )),
+                          ),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.3,
+                            child: AnimatedList(
+                              padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                              key: _listKey,
+                              initialItemCount: 0,
+                              itemBuilder: (context, index, animation) {
+                                return SlideTransition(
+                                    position: animation.drive(Tween(
+                                        begin: const Offset(3, 0),
+                                        end: const Offset(0, 0))),
+                                    child: _sideButtons[index]);
                               },
-                              icon: const Icon(
-                                  Icons.keyboard_arrow_left_outlined)),
-                        ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  )
+                ],
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: 56,
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  child: Column(
-                    children: [
-                      Card(
-                        child: IconButton(
-                            onPressed: _handleShowSideButtons,
-                            icon: AnimatedRotation(
-                              turns: _showSideButtonsButtonTurns,
-                              duration: const Duration(milliseconds: 200),
-                              child: const Icon(Icons.add),
-                            )),
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        child: AnimatedList(
-                          padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                          key: _listKey,
-                          initialItemCount: 0,
-                          itemBuilder: (context, index, animation) {
-                            return SlideTransition(
-                                position: animation.drive(Tween(
-                                    begin: const Offset(3, 0),
-                                    end: const Offset(0, 0))),
-                                child: _sideButtons[index]);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
-        ]),
-      )),
+            ]),
+          )),
     );
   }
 }

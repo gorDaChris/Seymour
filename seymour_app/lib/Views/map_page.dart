@@ -175,6 +175,18 @@ class _MapPageState extends State<MapPage> {
                     TileLayer(
                       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     ),
+                    MarkerLayer(
+                      markers: coords.map((Position pos) {
+                        return Marker(
+                          point: pos,
+                          child: Icon(
+                            Icons.location_pin,
+                            size: 30,
+                            color: Colors.red,
+                            )
+                        ),
+                      }).toList(),
+                    ),
                   ]
                 );
               }

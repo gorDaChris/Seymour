@@ -85,7 +85,18 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {},
+          onPressed: () async {
+            currentJourney.route = await coordinatesToRoute(
+                currentJourney
+                    .sights()
+                    .map((Sight s) => s.getCoordinate())
+                    .toList(),
+                _showBottomTextField);
+
+            setState(() {
+              routeLines = currentJourney.route!.drawRoute();
+            });
+          },
           icon: const Icon(Icons.route),
         ),
       ));
@@ -209,7 +220,7 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Polyline<Object> routeLine = Polyline(points: []);
+  List<Polyline<Object>> routeLines = [];
 
   Future<void> _handleAtoBRequest() async {
     topCoordinate = await getCoordinateFromAddress(topTextController.text);
@@ -221,7 +232,7 @@ class _MapPageState extends State<MapPage> {
           await coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
 
       setState(() {
-        routeLine = currentJourney.route!.drawRoute().first;
+        routeLines = currentJourney.route!.drawRoute();
       });
     }
     /* If only one text box is filled, then center the map on the only sight. */
@@ -331,7 +342,7 @@ class _MapPageState extends State<MapPage> {
                             urlTemplate:
                                 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           ),
-                          PolylineLayer(polylines: [routeLine]),
+                          PolylineLayer(polylines: [...routeLines]),
                         ]);
                   }
                 } else {
@@ -373,7 +384,7 @@ class _MapPageState extends State<MapPage> {
                                 ));
                           }).toList(),
                         ),
-                        PolylineLayer(polylines: [routeLine]),
+                        PolylineLayer(polylines: [...routeLines]),
                       ]);
                 }
                 return const Center(child: CircularProgressIndicator());

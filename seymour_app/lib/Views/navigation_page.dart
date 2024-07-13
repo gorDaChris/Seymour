@@ -86,6 +86,8 @@ class _NavigationPageState extends State<NavigationPage> {
     //A route must exist before we get to this page
     routeLine = currentJourney.route!.drawRoute().first;
 
+    Location().changeSettings(interval: 20000);
+
     locationStreamSubscription =
         Location().onLocationChanged.listen(interpretLocation);
   }

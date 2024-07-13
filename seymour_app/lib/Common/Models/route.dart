@@ -41,7 +41,7 @@ class Route {
           // useStrokeWidthInMeter: true,
           strokeWidth: 8,
           points: leg.points.map((coord) => coord.toLatLng()).toList(),
-          color: Colors.black));
+          color: const Color.fromARGB(98, 0, 0, 0)));
     }
 
     return drawnRoads;

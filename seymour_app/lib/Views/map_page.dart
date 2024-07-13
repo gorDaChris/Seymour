@@ -39,8 +39,6 @@ Future<LocationData?> currentLocation() async {
   return await location.getLocation();
 }
 
-Journey currentJourney = Journey();
-
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -50,8 +48,6 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   bool firstBuild = true;
-
-  CurrentJourney currentJourney = CurrentJourney();
 
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();

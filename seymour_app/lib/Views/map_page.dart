@@ -5,12 +5,43 @@ import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Models/journey.dart';
+
+import 'package:seymour_app/Common/Models/sight.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
+import 'package:seymour_app/Common/Queries/sights_by_radius.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
+import 'package:seymour_app/Views/navigation_page.dart';
 
 Journey currentJourney = Journey();
+
+const STARTING_MILES_RADIUS = 0.5;
+const METERS_IN_A_MILE = 1609.34;
+
+Future<LocationData?> currentLocation() async {
+  bool serviceEnabled;
+  PermissionStatus permissionGranted;
+
+  Location location = Location();
+
+  serviceEnabled = await location.serviceEnabled();
+  if (!serviceEnabled) {
+    serviceEnabled = await location.requestService();
+    if (!serviceEnabled) {
+      return null;
+    }
+  }
+
+  permissionGranted = await location.hasPermission();
+  if (permissionGranted == PermissionStatus.denied) {
+    permissionGranted = await location.requestPermission();
+    if (permissionGranted != PermissionStatus.granted) {
+      return null;
+    }
+  }
+  return await location.getLocation();
+}
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -20,8 +51,12 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  bool firstBuild = true;
+
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
+
+  late LatLng center;
 
   Coordinate? topCoordinate;
   Coordinate? bottomCoordinate;
@@ -36,6 +71,11 @@ class _MapPageState extends State<MapPage> {
         .push(MaterialPageRoute(builder: (context) => const SavePage()));
   }
 
+  void navigateToNavigationPage() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const NavigationPage()));
+  }
+
   void _handleShowSideButtons() {
     _showAllSideButtons = !_showAllSideButtons;
     if (_showAllSideButtons) {
@@ -45,7 +85,18 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {},
+          onPressed: () async {
+            currentJourney.route = await coordinatesToRoute(
+                currentJourney
+                    .sights()
+                    .map((Sight s) => s.getCoordinate())
+                    .toList(),
+                _showBottomTextField);
+
+            setState(() {
+              routeLines = currentJourney.route!.drawRoute();
+            });
+          },
           icon: const Icon(Icons.route),
         ),
       ));
@@ -65,12 +116,26 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            navigateToNavigationPage();
+          },
           icon: const Icon(Icons.navigation),
         ),
       ));
 
       _listKey.currentState?.insertItem(2);
+
+      _sideButtons.add(Card(
+        child: IconButton(
+          onPressed: () {
+            // TODO: Note this is TEMPORARY BEHAVIOR!
+            getNearbySights();
+          },
+          icon: const Icon(Icons.map),
+        ),
+      ));
+
+      _listKey.currentState?.insertItem(3);
     } else {
       setState(() {
         _showSideButtonsButtonTurns = 0;
@@ -116,6 +181,20 @@ class _MapPageState extends State<MapPage> {
           ),
         );
       });
+
+      _sideButtons.removeAt(0);
+      _listKey.currentState?.removeItem(0, (context, animation) {
+        return SlideTransition(
+          position: animation
+              .drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+          child: Card(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.map),
+            ),
+          ),
+        );
+      });
     }
   }
 
@@ -126,14 +205,22 @@ class _MapPageState extends State<MapPage> {
   double _showSideButtonsButtonTurns = 0;
 
   Future<void> _handleSearchRequest() async {
+    if (topTextController.text.isEmpty) return;
+
+    topCoordinate = await getCoordinateFromAddress(topTextController.text);
+
+    if (topCoordinate == null) return;
+
+    center = LatLng(topCoordinate!.latitude, topCoordinate!.longitude);
+    _mapController.move(center, 18);
+
     if (topTextController.text.isNotEmpty) {
       topCoordinate = await getCoordinateFromAddress(topTextController.text);
-      _mapController.move(
-          LatLng(topCoordinate!.latitude, topCoordinate!.longitude), 12);
+      _mapController.move(center, 18);
     }
   }
 
-  Polyline<Object> routeLine = Polyline(points: []);
+  List<Polyline<Object>> routeLines = [];
 
   Future<void> _handleAtoBRequest() async {
     topCoordinate = await getCoordinateFromAddress(topTextController.text);
@@ -141,36 +228,45 @@ class _MapPageState extends State<MapPage> {
         await getCoordinateFromAddress(bottomTextController.text);
 
     if (topCoordinate != null && bottomCoordinate != null) {
-      print("Coordintes Obtained");
-
       currentJourney.route =
           await coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
 
       setState(() {
-        routeLine = currentJourney.route!.drawRoute().first;
+        routeLines = currentJourney.route!.drawRoute();
       });
     }
     /* If only one text box is filled, then center the map on the only sight. */
     if (topTextController.text.isEmpty ^ bottomTextController.text.isEmpty) {
       if (topTextController.text.isEmpty) {
-        _mapController.move(
-            LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude),
-            12);
+        center =
+            LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude);
       } else {
-        _mapController.move(
-            LatLng(topCoordinate!.latitude, topCoordinate!.longitude), 12);
+        center = LatLng(topCoordinate!.latitude, topCoordinate!.longitude);
       }
+      _mapController.move(center, 12);
     }
     /* If both places are entered, center the map on the average between them */
     else if (topTextController.text.isNotEmpty &&
         topTextController.text.isNotEmpty) {
+      LatLngBounds bounds = LatLngBounds(
+          LatLng(topCoordinate!.latitude, topCoordinate!.longitude),
+          LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude));
+      center = bounds.center;
       _mapController.fitCamera(CameraFit.bounds(
-        bounds: LatLngBounds(
-            LatLng(topCoordinate!.latitude, topCoordinate!.longitude),
-            LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude)),
+        bounds: bounds,
         padding: const EdgeInsets.all(70),
       ));
     }
+  }
+
+  Future<void> getNearbySights() async {
+    // TODO: filter sights & store filtered list
+
+    recommendedSights =
+        await getSights(center, radiusInMiles * METERS_IN_A_MILE);
+    //  currentJourney
+    //       .setSights(await getSights(center, radiusInMiles * METERS_IN_A_MILE));
+    setState(() {});
   }
 
   Future<LocationData?> _currentLocation() async {
@@ -197,31 +293,98 @@ class _MapPageState extends State<MapPage> {
     return await location.getLocation();
   }
 
+  double radiusInMiles = STARTING_MILES_RADIUS;
+
+  List<Sight> recommendedSights = [];
+
+  void recommendedToSelected(int index) {
+    setState(() {
+      currentJourney.addSight(recommendedSights.removeAt(index));
+    });
+  }
+
+  void selectedToRecommended(int index) {
+    setState(() {
+      recommendedSights.add(currentJourney.removeSight(index));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: DraggableMenu(
-          backgroundChild: Container(
-        color: Colors.green,
-        child: Stack(children: [
+        recommendedToSelected: recommendedToSelected,
+        selectedToRecommended: selectedToRecommended,
+        recommendedSights: recommendedSights,
+        onRadiusChanged: (radiusMiles) {
+          setState(() {
+            radiusInMiles = radiusMiles;
+          });
+        },
+        backgroundChild: Stack(children: [
           FutureBuilder<LocationData?>(
               future: _currentLocation(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
-                if (snapchat.hasData) {
-                  final LocationData currentLocation = snapchat.data;
+                if (firstBuild) {
+                  if (snapchat.hasData) {
+                    final LocationData currentLocation = snapchat.data;
+                    center = LatLng(
+                        currentLocation.latitude!, currentLocation.longitude!);
+                    firstBuild = false;
+                    return FlutterMap(
+                        mapController: _mapController,
+                        options: MapOptions(
+                          initialCenter: center,
+                          initialZoom: 17,
+                        ),
+                        children: [
+                          TileLayer(
+                            urlTemplate:
+                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          ),
+                          PolylineLayer(polylines: [...routeLines]),
+                        ]);
+                  }
+                } else {
                   return FlutterMap(
                       mapController: _mapController,
                       options: MapOptions(
-                        initialCenter: LatLng(currentLocation.latitude!,
-                            currentLocation.longitude!),
-                        initialZoom: 12,
+                        initialCenter: center,
+                        initialZoom: 17,
                       ),
                       children: [
                         TileLayer(
                           urlTemplate:
                               'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         ),
-                        PolylineLayer(polylines: [routeLine]),
+                        CircleLayer(
+                          circles: [
+                            CircleMarker(
+                              borderStrokeWidth: 5,
+                              color: Color.fromARGB(50, 158, 28, 181),
+                              borderColor: Colors.black,
+                              point: center,
+                              radius: radiusInMiles * METERS_IN_A_MILE,
+                              useRadiusInMeter: true,
+                            ),
+                          ],
+                        ),
+                        MarkerLayer(
+                          markers: currentJourney
+                              .sights()
+                              .map((Sight sight) =>
+                                  sight.getCoordinate().toLatLng())
+                              .map((LatLng pos) {
+                            return Marker(
+                                point: pos,
+                                child: Icon(
+                                  Icons.location_pin,
+                                  size: 30,
+                                  color: Colors.red,
+                                ));
+                          }).toList(),
+                        ),
+                        PolylineLayer(polylines: [...routeLines]),
                       ]);
                 }
                 return const Center(child: CircularProgressIndicator());
@@ -341,7 +504,7 @@ class _MapPageState extends State<MapPage> {
             ],
           ),
         ]),
-      )),
+      ),
     );
   }
 }

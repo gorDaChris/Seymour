@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
+
+import 'package:seymour_app/Common/Models/sight.dart';
+import 'package:seymour_app/Views/map_page.dart';
 import 'package:seymour_app/Views/survey_page.dart';
 
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class DraggableMenu extends StatefulWidget {
   const DraggableMenu(
-      {super.key, required this.backgroundChild, this.onRadiusChanged});
+      {super.key,
+      required this.backgroundChild,
+      this.onRadiusChanged,
+      required this.recommendedSights,
+      required this.recommendedToSelected,
+      required this.selectedToRecommended});
 
   final Widget backgroundChild;
 
   final void Function(double)? onRadiusChanged;
+
+  final List<Sight> recommendedSights;
+
+  final void Function(int) recommendedToSelected;
+  final void Function(int) selectedToRecommended;
 
   @override
   State<DraggableMenu> createState() => _DraggableMenuState();
@@ -20,7 +33,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
 
   void navigateToSurveyPage() {
     Navigator.of(context)
-      .push(MaterialPageRoute(builder: (context) => const SurveyPage()));
+        .push(MaterialPageRoute(builder: (context) => const SurveyPage()));
   }
 
   @override
@@ -39,7 +52,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
       body: widget.backgroundChild,
 
       //This ListView may have to be changed to ListView.builder when it eventually displays locations
-      panel: ListView(
+      panel: Column(
         children: [
           ElevatedButton(
             child: const Text("Adjust Filters"),
@@ -78,8 +91,54 @@ class _DraggableMenuState extends State<DraggableMenu> {
           ),
           const Divider(),
           const Text("Selected Sights"),
+          if (currentJourney.sights().isEmpty) ...[
+            const Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                  Text("No nearby sights"),
+                ]))
+          ] else ...[
+            Expanded(
+                child: ListView.builder(
+              itemCount: currentJourney.sights().length,
+              itemBuilder: (context, index) {
+                // TODO: clickable; they should be buttons
+                return ListTile(
+                  title: Text(currentJourney.sights()[index].name()),
+                  onTap: () {
+                    widget.selectedToRecommended(index);
+                  },
+                );
+              },
+            )),
+          ],
           const Divider(),
-          const Text("Recommended Sights")
+          const Text("Recommended Sights"),
+          if (widget.recommendedSights.isEmpty) ...[
+            const Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                  Text("No nearby sights"),
+                ]))
+          ] else ...[
+            Expanded(
+                child: ListView.builder(
+              itemCount: widget.recommendedSights.length,
+              itemBuilder: (context, index) {
+                // TODO: clickable; they should be buttons
+                return ListTile(
+                  title: Text(widget.recommendedSights[index].name()),
+                  onTap: () {
+                    widget.recommendedToSelected(index);
+                  },
+                );
+              },
+            )),
+          ],
         ],
       ),
     );

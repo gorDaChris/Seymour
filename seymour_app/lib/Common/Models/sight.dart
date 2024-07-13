@@ -19,4 +19,8 @@ class Sight {
   String name() {
     return _name;
   }
+
+  Coordinate getCoordinate() {
+    return _coordinate;
+  }
 }

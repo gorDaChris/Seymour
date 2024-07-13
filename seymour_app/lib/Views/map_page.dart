@@ -335,6 +335,21 @@ class _MapPageState extends State<MapPage> {
                             ),
                           ],
                         ),
+                        MarkerLayer(
+                          markers: currentJourney
+                              .sights()
+                              .map((Sight sight) =>
+                                  sight.getCoordinate().toLatLng())
+                              .map((LatLng pos) {
+                            return Marker(
+                                point: pos,
+                                child: Icon(
+                                  Icons.location_pin,
+                                  size: 30,
+                                  color: Colors.red,
+                                ));
+                          }).toList(),
+                        ),
                         PolylineLayer(polylines: [routeLine]),
                       ]);
                 }

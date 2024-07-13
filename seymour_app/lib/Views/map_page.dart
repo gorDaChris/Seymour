@@ -85,10 +85,7 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {
-            // TODO: Note this is TEMPORARY BEHAVIOR!
-            getNearbySights();
-          },
+          onPressed: () {},
           icon: const Icon(Icons.route),
         ),
       ));
@@ -116,6 +113,18 @@ class _MapPageState extends State<MapPage> {
       ));
 
       _listKey.currentState?.insertItem(2);
+
+      _sideButtons.add(Card(
+        child: IconButton(
+          onPressed: () {
+            // TODO: Note this is TEMPORARY BEHAVIOR!
+            getNearbySights();
+          },
+          icon: const Icon(Icons.map),
+        ),
+      ));
+
+      _listKey.currentState?.insertItem(3);
     } else {
       setState(() {
         _showSideButtonsButtonTurns = 0;
@@ -157,6 +166,20 @@ class _MapPageState extends State<MapPage> {
             child: IconButton(
               onPressed: () {},
               icon: const Icon(Icons.navigation),
+            ),
+          ),
+        );
+      });
+
+      _sideButtons.removeAt(0);
+      _listKey.currentState?.removeItem(0, (context, animation) {
+        return SlideTransition(
+          position: animation
+              .drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+          child: Card(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.map),
             ),
           ),
         );

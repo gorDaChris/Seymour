@@ -4,11 +4,15 @@ import 'package:location/location.dart';
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
+import 'package:seymour_app/Common/Models/journey.dart';
 import 'package:seymour_app/Common/Models/current_journey.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
+import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
 import 'package:seymour_app/Common/Queries/sights_by_radius.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
+
+Journey currentJourney = Journey();
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -27,8 +31,8 @@ class _MapPageState extends State<MapPage> {
 
   late LatLng center; 
 
-  Coordinate? topAddress;
-  Coordinate? bottomAddress;
+  Coordinate? topCoordinate;
+  Coordinate? bottomCoordinate;
 
   double _turnsShowBottomTextFieldButton = 0;
   bool _showBottomTextField = false;
@@ -135,39 +139,53 @@ class _MapPageState extends State<MapPage> {
   Future<void> _handleSearchRequest() async {
     if (topTextController.text.isEmpty) return;
 
-    topAddress = await getCoordinateFromAddress(topTextController.text);
+    topCoordinate = await getCoordinateFromAddress(topTextController.text);
 
-    if (topAddress == null) return;
+    if (topCoordinate == null) return;
   
-    center = LatLng(topAddress!.latitude, topAddress!.longitude);
+    center = LatLng(topCoordinate!.latitude, topCoordinate!.longitude);
     _mapController.move(center, 12);
     
+    if (topTextController.text.isNotEmpty) {
+      topCoordinate = await getCoordinateFromAddress(topTextController.text);
+      _mapController.move(center, 12);
+    }
   }
 
+  Polyline<Object> routeLine = Polyline(points: []);
+
   Future<void> _handleAtoBRequest() async {
-    topAddress = await getCoordinateFromAddress(topTextController.text);
-    bottomAddress = await getCoordinateFromAddress(bottomTextController.text);
+    topCoordinate = await getCoordinateFromAddress(topTextController.text);
+    bottomCoordinate =
+        await getCoordinateFromAddress(bottomTextController.text);
 
-    if (topAddress == null || bottomAddress == null) return;
+    if (topCoordinate != null && bottomCoordinate != null) {
+      print("Coordintes Obtained");
 
+      currentJourney.route =
+          await coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
+
+      setState(() {
+        routeLine = currentJourney.route!.drawRoute().first;
+      });
+    }
     /* If only one text box is filled, then center the map on the only sight. */
     if (topTextController.text.isEmpty ^ bottomTextController.text.isEmpty) {
       if (topTextController.text.isEmpty) {
-        center = LatLng(bottomAddress!.latitude, bottomAddress!.longitude);
+        center = LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude);
       } else {
-        center = LatLng(topAddress!.latitude, topAddress!.longitude);
+        center = LatLng(topCoordinate!.latitude, topCoordinate!.longitude);
       }
       _mapController.move(center, 12);
     } 
     /* If both places are entered, center the map on the average between them */
     else if (topTextController.text.isNotEmpty && topTextController.text.isNotEmpty) {
-      LatLngBounds bounds = LatLngBounds(LatLng(topAddress!.latitude, topAddress!.longitude), LatLng(bottomAddress!.latitude, bottomAddress!.longitude));
+      LatLngBounds bounds = LatLngBounds(LatLng(topCoordinate!.latitude, topCoordinate!.longitude), LatLng(bottomCoordinate!.latitude, bottomCoordinate!.longitude));
       center = bounds.center;
       _mapController.fitCamera(CameraFit.bounds(
         bounds: bounds,
         padding: const EdgeInsets.all(70),
-        )
-      );
+      ));
     }
   }
 
@@ -179,9 +197,9 @@ class _MapPageState extends State<MapPage> {
   Future<LocationData?> _currentLocation() async {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
- 
+
     Location location = Location();
- 
+
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
@@ -189,7 +207,7 @@ class _MapPageState extends State<MapPage> {
         return null;
       }
     }
- 
+
     permissionGranted = await location.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();

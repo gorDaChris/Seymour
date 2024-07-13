@@ -11,10 +11,7 @@ final flutterOverpass = FlutterOverpass();
 
 Future<List<Sight>> getSights(LatLng center, double radius) async {
   final result = await flutterOverpass.getNearbyNodes(
-    latitude: center.latitude,
-    longitude: center.longitude,
-    radius: radius
-  );
+      latitude: center.latitude, longitude: center.longitude, radius: radius);
 
   List<Element>? queryResults = result.elements;
 
@@ -28,13 +25,18 @@ Future<List<Sight>> getSights(LatLng center, double radius) async {
     Element element = queryResults[i];
 
     // Ensure null safety
-    if (element.lat == null || element.lon == null) { continue; }
-    if (element.tags == null || element.tags?.name == null) { continue; }
+    if (element.lat == null || element.lon == null) {
+      continue;
+    }
+    if (element.tags == null || element.tags?.name == null) {
+      continue;
+    }
 
     String? name = element.tags?.name;
     name ??= "";
 
-    nearby.add(Sight(name, Coordinate(element.lat!, element.lon!), element.tags!));
+    nearby.add(
+        Sight(name, Coordinate(element.lat!, element.lon!), element.tags!));
   }
 
   // DEBUG

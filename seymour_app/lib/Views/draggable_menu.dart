@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:seymour_app/Common/Models/current_journey.dart';
+
+import 'package:seymour_app/Common/Models/sight.dart';
+import 'package:seymour_app/Views/map_page.dart';
 import 'package:seymour_app/Views/survey_page.dart';
 
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class DraggableMenu extends StatefulWidget {
   const DraggableMenu(
-      {super.key, required this.backgroundChild, this.onRadiusChanged});
+      {super.key,
+      required this.backgroundChild,
+      this.onRadiusChanged,
+      required this.recommendedSights,
+      required this.recommendedToSelected,
+      required this.selectedToRecommended});
 
   final Widget backgroundChild;
 
   final void Function(double)? onRadiusChanged;
+
+  final List<Sight> recommendedSights;
+
+  final void Function(int) recommendedToSelected;
+  final void Function(int) selectedToRecommended;
 
   @override
   State<DraggableMenu> createState() => _DraggableMenuState();
@@ -21,7 +33,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
 
   void navigateToSurveyPage() {
     Navigator.of(context)
-      .push(MaterialPageRoute(builder: (context) => const SurveyPage()));
+        .push(MaterialPageRoute(builder: (context) => const SurveyPage()));
   }
 
   @override
@@ -42,32 +54,32 @@ class _DraggableMenuState extends State<DraggableMenu> {
       //This ListView may have to be changed to ListView.builder when it eventually displays locations
       panel: Column(
         children: [
-            ElevatedButton(
-              child: const Text("Adjust Filters"),
-              onPressed: () {
-                navigateToSurveyPage();
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: Slider(
-                    min: 0.1,
-                    max: 2,
-                    value: radius,
-                    onChanged: (value) {
-                      if (widget.onRadiusChanged is void Function(double)) {
-                        widget.onRadiusChanged!(value);
-                      }
-                      setState(() {
-                        radius = value;
-                      });
-                    },
-                    label: radius.toString(),
-                  ),
+          ElevatedButton(
+            child: const Text("Adjust Filters"),
+            onPressed: () {
+              navigateToSurveyPage();
+            },
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                flex: 5,
+                child: Slider(
+                  min: 0.1,
+                  max: 2,
+                  value: radius,
+                  onChanged: (value) {
+                    if (widget.onRadiusChanged is void Function(double)) {
+                      widget.onRadiusChanged!(value);
+                    }
+                    setState(() {
+                      radius = value;
+                    });
+                  },
+                  label: radius.toString(),
                 ),
+              ),
               Expanded(
                 flex: 1,
                 child: Text(
@@ -79,32 +91,53 @@ class _DraggableMenuState extends State<DraggableMenu> {
           ),
           const Divider(),
           const Text("Selected Sights"),
-          const Divider(),
-          const Text("Recommended Sights"),
-          /* TODO: this widget will display the sights on build, but is only built once when first
-                   pulled up. The menu, or this part of the menu, should update automatically.
-          */
-          if (CurrentJourney().sights().isEmpty) ...[
+          if (currentJourney.sights().isEmpty) ...[
             const Center(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                Text("No nearby sights"),
-              ])
-            )
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                  Text("No nearby sights"),
+                ]))
           ] else ...[
             Expanded(
-              child: ListView.builder(
-                itemCount: CurrentJourney().sights().length,
-                itemBuilder: (context, index) {
-                  // TODO: clickable; they should be buttons
-                  return ListTile(
-                    title: Text(CurrentJourney().sights()[index].name()),
-                  );
-                },
-              )
-            ),
+                child: ListView.builder(
+              itemCount: currentJourney.sights().length,
+              itemBuilder: (context, index) {
+                // TODO: clickable; they should be buttons
+                return ListTile(
+                  title: Text(currentJourney.sights()[index].name()),
+                  onTap: () {
+                    widget.selectedToRecommended(index);
+                  },
+                );
+              },
+            )),
+          ],
+          const Divider(),
+          const Text("Recommended Sights"),
+          if (widget.recommendedSights.isEmpty) ...[
+            const Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                  Text("No nearby sights"),
+                ]))
+          ] else ...[
+            Expanded(
+                child: ListView.builder(
+              itemCount: widget.recommendedSights.length,
+              itemBuilder: (context, index) {
+                // TODO: clickable; they should be buttons
+                return ListTile(
+                  title: Text(widget.recommendedSights[index].name()),
+                  onTap: () {
+                    widget.recommendedToSelected(index);
+                  },
+                );
+              },
+            )),
           ],
         ],
       ),

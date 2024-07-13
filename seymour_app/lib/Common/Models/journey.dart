@@ -18,4 +18,12 @@ class Journey {
   bool isEmpty() {
     return _currentSights.isEmpty;
   }
+
+  void addSight(Sight sight) {
+    _currentSights.add(sight);
+  }
+
+  Sight removeSight(int index) {
+    return _currentSights.removeAt(index);
+  }
 }

@@ -5,7 +5,8 @@ import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Models/journey.dart';
-import 'package:seymour_app/Common/Models/current_journey.dart';
+
+import 'package:seymour_app/Common/Models/sight.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
 import 'package:seymour_app/Common/Queries/sights_by_radius.dart';
@@ -84,9 +85,17 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {
-            // TODO: Note this is TEMPORARY BEHAVIOR!
-            getNearbySights();
+          onPressed: () async {
+            currentJourney.route = await coordinatesToRoute(
+                currentJourney
+                    .sights()
+                    .map((Sight s) => s.getCoordinate())
+                    .toList(),
+                _showBottomTextField);
+
+            setState(() {
+              routeLines = currentJourney.route!.drawRoute();
+            });
           },
           icon: const Icon(Icons.route),
         ),
@@ -115,6 +124,18 @@ class _MapPageState extends State<MapPage> {
       ));
 
       _listKey.currentState?.insertItem(2);
+
+      _sideButtons.add(Card(
+        child: IconButton(
+          onPressed: () {
+            // TODO: Note this is TEMPORARY BEHAVIOR!
+            getNearbySights();
+          },
+          icon: const Icon(Icons.map),
+        ),
+      ));
+
+      _listKey.currentState?.insertItem(3);
     } else {
       setState(() {
         _showSideButtonsButtonTurns = 0;
@@ -160,6 +181,20 @@ class _MapPageState extends State<MapPage> {
           ),
         );
       });
+
+      _sideButtons.removeAt(0);
+      _listKey.currentState?.removeItem(0, (context, animation) {
+        return SlideTransition(
+          position: animation
+              .drive(Tween(begin: const Offset(3, 0), end: const Offset(0, 0))),
+          child: Card(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.map),
+            ),
+          ),
+        );
+      });
     }
   }
 
@@ -177,15 +212,15 @@ class _MapPageState extends State<MapPage> {
     if (topCoordinate == null) return;
 
     center = LatLng(topCoordinate!.latitude, topCoordinate!.longitude);
-    _mapController.move(center, 12);
+    _mapController.move(center, 18);
 
     if (topTextController.text.isNotEmpty) {
       topCoordinate = await getCoordinateFromAddress(topTextController.text);
-      _mapController.move(center, 12);
+      _mapController.move(center, 18);
     }
   }
 
-  Polyline<Object> routeLine = Polyline(points: []);
+  List<Polyline<Object>> routeLines = [];
 
   Future<void> _handleAtoBRequest() async {
     topCoordinate = await getCoordinateFromAddress(topTextController.text);
@@ -197,7 +232,7 @@ class _MapPageState extends State<MapPage> {
           await coordinatesToRoute([topCoordinate!, bottomCoordinate!], true);
 
       setState(() {
-        routeLine = currentJourney.route!.drawRoute().first;
+        routeLines = currentJourney.route!.drawRoute();
       });
     }
     /* If only one text box is filled, then center the map on the only sight. */
@@ -227,8 +262,11 @@ class _MapPageState extends State<MapPage> {
   Future<void> getNearbySights() async {
     // TODO: filter sights & store filtered list
 
-    currentJourney
-        .setSights(await getSights(center, radiusInMiles * METERS_IN_A_MILE));
+    recommendedSights =
+        await getSights(center, radiusInMiles * METERS_IN_A_MILE);
+    //  currentJourney
+    //       .setSights(await getSights(center, radiusInMiles * METERS_IN_A_MILE));
+    setState(() {});
   }
 
   Future<LocationData?> _currentLocation() async {
@@ -257,10 +295,27 @@ class _MapPageState extends State<MapPage> {
 
   double radiusInMiles = STARTING_MILES_RADIUS;
 
+  List<Sight> recommendedSights = [];
+
+  void recommendedToSelected(int index) {
+    setState(() {
+      currentJourney.addSight(recommendedSights.removeAt(index));
+    });
+  }
+
+  void selectedToRecommended(int index) {
+    setState(() {
+      recommendedSights.add(currentJourney.removeSight(index));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: DraggableMenu(
+        recommendedToSelected: recommendedToSelected,
+        selectedToRecommended: selectedToRecommended,
+        recommendedSights: recommendedSights,
         onRadiusChanged: (radiusMiles) {
           setState(() {
             radiusInMiles = radiusMiles;
@@ -287,7 +342,7 @@ class _MapPageState extends State<MapPage> {
                             urlTemplate:
                                 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           ),
-                          PolylineLayer(polylines: [routeLine]),
+                          PolylineLayer(polylines: [...routeLines]),
                         ]);
                   }
                 } else {
@@ -314,7 +369,22 @@ class _MapPageState extends State<MapPage> {
                             ),
                           ],
                         ),
-                        PolylineLayer(polylines: [routeLine]),
+                        MarkerLayer(
+                          markers: currentJourney
+                              .sights()
+                              .map((Sight sight) =>
+                                  sight.getCoordinate().toLatLng())
+                              .map((LatLng pos) {
+                            return Marker(
+                                point: pos,
+                                child: Icon(
+                                  Icons.location_pin,
+                                  size: 30,
+                                  color: Colors.red,
+                                ));
+                          }).toList(),
+                        ),
+                        PolylineLayer(polylines: [...routeLines]),
                       ]);
                 }
                 return const Center(child: CircularProgressIndicator());

@@ -84,7 +84,7 @@ class _NavigationPageState extends State<NavigationPage> {
   void initState() {
     super.initState();
     //A route must exist before we get to this page
-    routeLine = currentJourney.route!.drawRoute().first;
+    routeLines = currentJourney.route!.drawRoute();
 
     Location().changeSettings(interval: 20000);
 
@@ -92,7 +92,7 @@ class _NavigationPageState extends State<NavigationPage> {
         Location().onLocationChanged.listen(interpretLocation);
   }
 
-  Polyline<Object> routeLine = Polyline(points: []);
+  List<Polyline<Object>> routeLines = [];
 
   String? formatInstructionMessage(String? message) {
     return message?.replaceAll("<street>", "").replaceAll("</street>", "");
@@ -123,8 +123,9 @@ class _NavigationPageState extends State<NavigationPage> {
                     final LocationData currentLocation = snapchat.data;
                     return FlutterMap(
                         options: MapOptions(
-                          initialCenter: LatLng(currentLocation.latitude!,
-                              currentLocation.longitude!),
+                          initialCenter: currentJourney
+                              .route!.legs.first.points.first
+                              .toLatLng(),
                           initialZoom: 17,
                         ),
                         children: [
@@ -132,7 +133,7 @@ class _NavigationPageState extends State<NavigationPage> {
                             urlTemplate:
                                 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           ),
-                          PolylineLayer(polylines: [routeLine]),
+                          PolylineLayer(polylines: [...routeLines]),
                           CircleLayer(circles: [userLocationMarker])
                         ]);
                   }

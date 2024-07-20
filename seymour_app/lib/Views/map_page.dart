@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_popup/flutter_popup.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Models/journey.dart';
 
@@ -372,17 +373,32 @@ class _MapPageState extends State<MapPage> {
                         MarkerLayer(
                           markers: currentJourney
                               .sights()
-                              .map((Sight sight) =>
-                                  sight.getCoordinate().toLatLng())
-                              .map((LatLng pos) {
-                            return Marker(
-                                point: pos,
-                                child: Icon(
-                                  Icons.location_pin,
-                                  size: 30,
-                                  color: Colors.red,
-                                ));
-                          }).toList(),
+                              .map((Sight sight) => Marker(
+                                  point: sight.getCoordinate().toLatLng(),
+                                  child: CustomPopup(
+                                      child: Icon(
+                                        Icons.location_pin,
+                                        size: 30,
+                                        color: Colors.red,
+                                      ),
+                                      content: SizedBox(
+                                          width: 200,
+                                          height: 100,
+                                          child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              // mainAxisAlignment:
+                                              //     // MainAxisAlignment.spaceBetween,
+                                              children: <Widget>[
+                                                Text(sight.name(),
+                                                    textScaler:
+                                                        TextScaler.linear(1.2)),
+                                                ElevatedButton(
+                                                    child: const Text(
+                                                        "Open in Wikipedia"),
+                                                    onPressed: null)
+                                              ])))))
+                              .toList(),
                         ),
                         PolylineLayer(polylines: [...routeLines]),
                       ]);

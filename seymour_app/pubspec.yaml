@@ -41,6 +41,7 @@ dependencies:
   flutter_map: ^7.0.1
   location: ^6.0.2
   flutter_overpass: ^1.1.0
+  flutter_popup: ^3.3.0
 
 dev_dependencies:
   flutter_test:

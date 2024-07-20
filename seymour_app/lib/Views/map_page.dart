@@ -373,36 +373,32 @@ class _MapPageState extends State<MapPage> {
                         MarkerLayer(
                           markers: currentJourney
                               .sights()
-                              .map((Sight sight) =>
-                                  sight.getCoordinate().toLatLng())
-                              .map((LatLng pos) {
-                            return Marker(
-                                point: pos,
-                                child: CustomPopup(
-                                  child: Icon(
-                                    Icons.location_pin,
-                                    size: 30,
-                                    color: Colors.red,
-                                  ),
-                                  content: SizedBox(
-                                    width: 200,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Text(
-                                          "Location name",
-                                          textScaler: TextScaler.linear(1.2)
-                                        ),
-                                        ElevatedButton(
-                                          child: const Text("Open in Wikipedia"),
-                                          onPressed: null
-                                        )
-                                      ]
-                                    )
-                                  )
-                                )
-                              );
-                          }).toList(),
+                              .map((Sight sight) => Marker(
+                                  point: sight.getCoordinate().toLatLng(),
+                                  child: CustomPopup(
+                                      child: Icon(
+                                        Icons.location_pin,
+                                        size: 30,
+                                        color: Colors.red,
+                                      ),
+                                      content: SizedBox(
+                                          width: 200,
+                                          height: 100,
+                                          child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              // mainAxisAlignment:
+                                              //     // MainAxisAlignment.spaceBetween,
+                                              children: <Widget>[
+                                                Text(sight.name(),
+                                                    textScaler:
+                                                        TextScaler.linear(1.2)),
+                                                ElevatedButton(
+                                                    child: const Text(
+                                                        "Open in Wikipedia"),
+                                                    onPressed: null)
+                                              ])))))
+                              .toList(),
                         ),
                         PolylineLayer(polylines: [...routeLines]),
                       ]);

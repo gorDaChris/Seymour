@@ -11,7 +11,7 @@ class Sight {
 
   String? _wikipediaLink;
 
-  Sight(this._name, this._coordinate, this._tag, this._wikipediaLink);
+  Sight(this._name, this._coordinate, this._tag);
 
   @override
   String toString() {

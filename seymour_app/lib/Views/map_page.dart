@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_popup/flutter_popup.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Models/journey.dart';
 
@@ -377,11 +378,30 @@ class _MapPageState extends State<MapPage> {
                               .map((LatLng pos) {
                             return Marker(
                                 point: pos,
-                                child: Icon(
-                                  Icons.location_pin,
-                                  size: 30,
-                                  color: Colors.red,
-                                ));
+                                child: CustomPopup(
+                                  child: Icon(
+                                    Icons.location_pin,
+                                    size: 30,
+                                    color: Colors.red,
+                                  ),
+                                  content: SizedBox(
+                                    width: 200,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text(
+                                          "Location name",
+                                          textScaler: TextScaler.linear(1.2)
+                                        ),
+                                        ElevatedButton(
+                                          child: const Text("Open in Wikipedia"),
+                                          onPressed: null
+                                        )
+                                      ]
+                                    )
+                                  )
+                                )
+                              );
                           }).toList(),
                         ),
                         PolylineLayer(polylines: [...routeLines]),

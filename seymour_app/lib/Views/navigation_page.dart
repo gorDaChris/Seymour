@@ -139,10 +139,6 @@ class _NavigationPageState extends State<NavigationPage> {
                   }
                   return const Center(child: CircularProgressIndicator());
                 }),
-            // This is the "arrived at destination" screen
-            // TODO: What are we even going to do for this?
-            // TODO: Button that calls _hideDestinationMenu
-            // TODO: Darkened background
             panel: Container(
                 color: Colors.grey,
                 child: Column(children: <Widget>[

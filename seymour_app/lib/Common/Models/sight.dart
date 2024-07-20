@@ -9,7 +9,9 @@ class Sight {
   final Tag _tag; // WIP
   final Coordinate _coordinate;
 
-  Sight(this._name, this._coordinate, this._tag);
+  String? _wikipediaLink;
+
+  Sight(this._name, this._coordinate, this._tag, this._wikipediaLink);
 
   @override
   String toString() {
@@ -22,5 +24,9 @@ class Sight {
 
   Coordinate getCoordinate() {
     return _coordinate;
+  }
+
+  String? getWikipediaLink() {
+    return _wikipediaLink;
   }
 }

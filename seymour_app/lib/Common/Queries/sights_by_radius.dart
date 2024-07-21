@@ -10,37 +10,27 @@ import 'package:seymour_app/Common/Models/sight.dart';
 final flutterOverpass = FlutterOverpass();
 
 Future<List<Sight>> getSights(LatLng center, double radius) async {
-  final result = await flutterOverpass.getNearbyNodes(
-      latitude: center.latitude, longitude: center.longitude, radius: radius);
+  final queryResult = await flutterOverpass.rawOverpassQL(
+      query: "node(around:$radius,${center.latitude},${center.longitude});");
 
-  List<Element>? queryResults = result.elements;
-
-  if (queryResults == null || queryResults.isEmpty) {
-    // HANDLE NULL
-    return List.empty();
-  }
+  log(queryResult.toString());
 
   List<Sight> nearby = [];
-  for (var i = 0; i < queryResults.length; i++) {
-    Element element = queryResults[i];
 
-    // Ensure null safety
-    if (element.lat == null || element.lon == null) {
-      continue;
+  for (dynamic node in queryResult["elements"]) {
+    if (node["tags"] != null &&
+        node["tags"]["tourism"] != null &&
+        node["tags"]["name"] != null) {
+      nearby.add(Sight(
+          node["tags"]["name"],
+          Coordinate(node["lat"], node["lon"]),
+          node["tags"]["tourism"],
+          node["tags"]["wikipedia"]));
     }
-    if (element.tags == null || element.tags?.name == null) {
-      continue;
-    }
-
-    String? name = element.tags?.name;
-    name ??= "";
-
-    nearby.add(
-        Sight(name, Coordinate(element.lat!, element.lon!), element.tags!));
   }
 
   // DEBUG
-  log(nearby.toString());
+  // log(nearby.toString());
 
   return nearby;
 }

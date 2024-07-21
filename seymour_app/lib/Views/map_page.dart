@@ -14,6 +14,7 @@ import 'package:seymour_app/Common/Queries/sights_by_radius.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
 import 'package:seymour_app/Views/navigation_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Journey currentJourney = Journey();
 
@@ -383,7 +384,7 @@ class _MapPageState extends State<MapPage> {
                                       ),
                                       content: SizedBox(
                                           width: 200,
-                                          height: 100,
+                                          height: 200,
                                           child: Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
@@ -396,7 +397,18 @@ class _MapPageState extends State<MapPage> {
                                                 ElevatedButton(
                                                     child: const Text(
                                                         "Open in Wikipedia"),
-                                                    onPressed: null)
+                                                    onPressed:
+                                                        sight.getWikipediaTitle() ==
+                                                                null
+                                                            ? null
+                                                            : () async {
+                                                                await launchUrl(
+                                                                    Uri.https(
+                                                                        "en.wikipedia.org",
+                                                                        "/wiki/${sight.getWikipediaTitle()}"),
+                                                                    mode: LaunchMode
+                                                                        .inAppBrowserView);
+                                                              })
                                               ])))))
                               .toList(),
                         ),

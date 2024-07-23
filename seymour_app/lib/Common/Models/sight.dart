@@ -6,12 +6,12 @@ import 'package:flutter_overpass/flutter_overpass.dart';
 ///
 class Sight {
   final String _name;
-  final Tag _tag; // WIP
+  final String _tourismType;
   final Coordinate _coordinate;
 
-  String? _wikipediaLink;
+  String? _wikipediaTitle;
 
-  Sight(this._name, this._coordinate, this._tag);
+  Sight(this._name, this._coordinate, this._tourismType, this._wikipediaTitle);
 
   @override
   String toString() {
@@ -26,7 +26,7 @@ class Sight {
     return _coordinate;
   }
 
-  String? getWikipediaLink() {
-    return _wikipediaLink;
+  String? getWikipediaTitle() {
+    return _wikipediaTitle;
   }
 }

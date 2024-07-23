@@ -38,22 +38,28 @@ class _DraggableMenuState extends State<DraggableMenu> {
 
   @override
   Widget build(BuildContext context) {
+    BorderRadiusGeometry br = const BorderRadius.only(
+      topLeft: Radius.circular(15.0),
+      topRight: Radius.circular(15.0),
+    );
     return SlidingUpPanel(
+      borderRadius: br,
       panelSnapping: false,
-      minHeight: 20,
+      minHeight: 50,
       // maxHeight: MediaQuery.of(context).size.height * 0.8,
-      header: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: 20,
-        child: const Card(
-          color: Colors.grey,
-        ),
-      ),
       body: widget.backgroundChild,
 
       //This ListView may have to be changed to ListView.builder when it eventually displays locations
       panel: Column(
         children: [
+          SizedBox(
+            width: MediaQuery.of(context).size.width / 5,
+            height: 13,
+            child: const Card(
+              color: Colors.grey,
+            ),
+          ),
+
           ElevatedButton(
             child: const Text("Adjust Filters"),
             onPressed: () {

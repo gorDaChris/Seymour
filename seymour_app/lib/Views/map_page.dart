@@ -361,44 +361,52 @@ class _MapPageState extends State<MapPage> {
                         CircleLayer(
                           circles: [
                             CircleMarker(
-                              borderStrokeWidth: 5,
-                              color: Color.fromARGB(50, 158, 28, 181),
-                              borderColor: Colors.black,
+                              borderStrokeWidth: 3,
+                              color: const Color.fromARGB(50, 158, 28, 181),
+                              borderColor: const Color.fromARGB(255, 106, 0, 124),
                               point: center,
                               radius: radiusInMiles * METERS_IN_A_MILE,
                               useRadiusInMeter: true,
                             ),
                           ],
                         ),
+                        CircleLayer(
+                          circles: currentJourney.sights().map((Sight sight) => CircleMarker(
+                              borderStrokeWidth: 3,
+                              color: const Color.fromARGB(50, 158, 28, 181),
+                              borderColor: const Color.fromARGB(255, 106, 0, 124),
+                              point: sight.getCoordinate().toLatLng(),
+                              radius: radiusInMiles * METERS_IN_A_MILE,
+                              useRadiusInMeter: true,
+                          )).toList(),
+                        ),
                         MarkerLayer(
-                          markers: currentJourney
-                              .sights()
-                              .map((Sight sight) => Marker(
+                          markers: currentJourney.sights().map((Sight sight) => Marker(
                                   point: sight.getCoordinate().toLatLng(),
                                   child: CustomPopup(
-                                      child: Icon(
-                                        Icons.location_pin,
-                                        size: 30,
-                                        color: Colors.red,
-                                      ),
                                       content: SizedBox(
                                           width: 200,
                                           height: 100,
                                           child: Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
-                                              // mainAxisAlignment:
-                                              //     // MainAxisAlignment.spaceBetween,
                                               children: <Widget>[
                                                 Text(sight.name(),
-                                                    textScaler:
-                                                        TextScaler.linear(1.2)),
-                                                ElevatedButton(
-                                                    child: const Text(
-                                                        "Open in Wikipedia"),
-                                                    onPressed: null)
-                                              ])))))
-                              .toList(),
+                                                    textScaler: const TextScaler.linear(1.2)),
+                                                const ElevatedButton(
+                                                    onPressed: null,
+                                                    child: Text("Open in Wikipedia")
+                                                )
+                                              ]
+                                          )
+                                      ),
+                                      child: const Icon(
+                                        Icons.location_pin,
+                                        size: 30,
+                                        color: Colors.red,
+                                      )
+                                  )
+                          )).toList(),
                         ),
                         PolylineLayer(polylines: [...routeLines]),
                       ]);

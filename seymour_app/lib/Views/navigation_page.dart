@@ -2,12 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_popup/flutter_popup.dart';
+import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:seymour_app/Common/Models/route.dart';
+import 'package:seymour_app/Common/Models/sight.dart';
+import 'package:seymour_app/Common/Queries/readWikipediaArticleAloud.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import 'package:seymour_app/Views/map_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NavigationPage extends StatefulWidget {
   const NavigationPage({super.key});
@@ -134,7 +139,61 @@ class _NavigationPageState extends State<NavigationPage> {
                                 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           ),
                           PolylineLayer(polylines: [...routeLines]),
-                          CircleLayer(circles: [userLocationMarker])
+                          CircleLayer(circles: [userLocationMarker]),
+                          MarkerLayer(
+                            markers: currentJourney
+                                .sights()
+                                .map((Sight sight) => Marker(
+                                    point: sight.getCoordinate().toLatLng(),
+                                    child: CustomPopup(
+                                        child: Icon(
+                                          Icons.location_pin,
+                                          size: 30,
+                                          color: Colors.red,
+                                        ),
+                                        content: SizedBox(
+                                            width: 200,
+                                            height: 200,
+                                            child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                // mainAxisAlignment:
+                                                //     // MainAxisAlignment.spaceBetween,
+                                                children: <Widget>[
+                                                  Text(sight.name(),
+                                                      textScaler:
+                                                          TextScaler.linear(
+                                                              1.2)),
+                                                  ElevatedButton(
+                                                      child: const Text(
+                                                          "Open in Wikipedia"),
+                                                      onPressed:
+                                                          sight.getWikipediaTitle() ==
+                                                                  null
+                                                              ? null
+                                                              : () async {
+                                                                  await launchUrl(
+                                                                      Uri.https(
+                                                                          "en.wikipedia.org",
+                                                                          "/wiki/${sight.getWikipediaTitle()}"),
+                                                                      mode: LaunchMode
+                                                                          .inAppBrowserView);
+                                                                }),
+                                                  ElevatedButton(
+                                                      onPressed:
+                                                          sight.getWikipediaTitle() ==
+                                                                  null
+                                                              ? null
+                                                              : () {
+                                                                  readWikipediaArticleAloud(
+                                                                      sight
+                                                                          .getWikipediaTitle()!);
+                                                                },
+                                                      child: const Text(
+                                                          "Read wikipedia audio guide aloud"))
+                                                ])))))
+                                .toList(),
+                          ),
                         ]);
                   }
                   return const Center(child: CircularProgressIndicator());

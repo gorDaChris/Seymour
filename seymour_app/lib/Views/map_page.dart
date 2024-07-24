@@ -265,6 +265,16 @@ class _MapPageState extends State<MapPage> {
 
     recommendedSights =
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
+
+    // list of Sights for each point is stored in list predeterminedSights
+    List<List<Sight>> predeterminedSights = await Future.wait(
+      currentJourney.sights().map((point) => getSights(point.getCoordinate().toLatLng(), radiusInMiles * METERS_IN_A_MILE))
+    );
+    // transfer all sights to recommendedSights
+    for(List<Sight> sights in predeterminedSights) {
+      recommendedSights.addAll(sights);
+    }
+
     //  currentJourney
     //       .setSights(await getSights(center, radiusInMiles * METERS_IN_A_MILE));
     setState(() {});

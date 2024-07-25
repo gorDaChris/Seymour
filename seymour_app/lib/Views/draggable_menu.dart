@@ -59,7 +59,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
               color: Colors.grey,
             ),
           ),
-
+          const Padding(padding: EdgeInsets.all(5)),
           ElevatedButton(
             child: const Text("Adjust Filters"),
             onPressed: () {

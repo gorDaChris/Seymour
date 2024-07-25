@@ -430,7 +430,7 @@ class _MapPageState extends State<MapPage> {
               Center(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Column(
                       children: [
@@ -449,8 +449,8 @@ class _MapPageState extends State<MapPage> {
                               controller: topTextController,
                               decoration: InputDecoration(
                                   hintText: _showBottomTextField
-                                      ? "Start of route"
-                                      : "Center of route"),
+                                      ? "  Start of route"
+                                      : "  Center of route"),
                             ),
                           ),
                         ),
@@ -471,7 +471,7 @@ class _MapPageState extends State<MapPage> {
                                 },
                                 controller: bottomTextController,
                                 decoration: const InputDecoration(
-                                    hintText: "Destination"),
+                                    hintText: "  Destination"),
                               ),
                             ),
                           ),
@@ -500,41 +500,44 @@ class _MapPageState extends State<MapPage> {
                   ],
                 ),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: 56,
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  child: Column(
-                    children: [
-                      Card(
-                        child: IconButton(
-                            onPressed: _handleShowSideButtons,
-                            icon: AnimatedRotation(
-                              turns: _showSideButtonsButtonTurns,
-                              duration: const Duration(milliseconds: 200),
-                              child: const Icon(Icons.add),
-                            )),
-                      ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        child: AnimatedList(
-                          padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                          key: _listKey,
-                          initialItemCount: 0,
-                          itemBuilder: (context, index, animation) {
-                            return SlideTransition(
-                                position: animation.drive(Tween(
-                                    begin: const Offset(3, 0),
-                                    end: const Offset(0, 0))),
-                                child: _sideButtons[index]);
-                          },
+              Padding(
+                padding: EdgeInsets.fromLTRB(0, 0, 9, 0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    width: 56,
+                    height: MediaQuery.of(context).size.height * 0.4,
+                    child: Column(
+                      children: [
+                        Card(
+                          child: IconButton(
+                              onPressed: _handleShowSideButtons,
+                              icon: AnimatedRotation(
+                                turns: _showSideButtonsButtonTurns,
+                                duration: const Duration(milliseconds: 200),
+                                child: const Icon(Icons.add),
+                              )),
                         ),
-                      ),
-                    ],
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.3,
+                          child: AnimatedList(
+                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            key: _listKey,
+                            initialItemCount: 0,
+                            itemBuilder: (context, index, animation) {
+                              return SlideTransition(
+                                  position: animation.drive(Tween(
+                                      begin: const Offset(3, 0),
+                                      end: const Offset(0, 0))),
+                                  child: _sideButtons[index]);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ]),

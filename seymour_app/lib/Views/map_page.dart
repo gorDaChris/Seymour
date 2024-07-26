@@ -273,7 +273,7 @@ class _MapPageState extends State<MapPage> {
     
 
     // Shorten list of coordinates for efficiency
-    
+    coordinates = coordinates.asMap().entries.where((entry) => (entry.key + 1) % 5 == 0).map((entry) => entry.value).toList();
 
 
     List<Future<List<Sight>>> predetSightFutures = coordinates.map((coordinate) => getSights(coordinate.toLatLng(), radiusInMiles * METERS_IN_A_MILE)).toList();

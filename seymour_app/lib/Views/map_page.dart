@@ -266,17 +266,24 @@ class _MapPageState extends State<MapPage> {
     recommendedSights =
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
 
-    // list of Sights for each point is stored in list predeterminedSights
-    List<List<Sight>> predeterminedSights = await Future.wait(
-      currentJourney.sights().map((point) => getSights(point.getCoordinate().toLatLng(), radiusInMiles * METERS_IN_A_MILE))
-    );
+    // Compile points along route and then getSights for each point
+    for(var leg in currentJourney.route!.legs) {
+      coordinates.addAll(leg.points);
+    }
+    
+
+    // Shorten list of coordinates for efficiency
+    
+
+
+    List<Future<List<Sight>>> predetSightFutures = coordinates.map((coordinate) => getSights(coordinate.toLatLng(), radiusInMiles * METERS_IN_A_MILE)).toList();
+    List<List<Sight>> predetSights = await Future.wait(predetSightFutures);
+
     // transfer all sights to recommendedSights
-    for(List<Sight> sights in predeterminedSights) {
+    for(List<Sight> sights in predetSights) {
       recommendedSights.addAll(sights);
     }
 
-    //  currentJourney
-    //       .setSights(await getSights(center, radiusInMiles * METERS_IN_A_MILE));
     setState(() {});
   }
 
@@ -307,6 +314,7 @@ class _MapPageState extends State<MapPage> {
   double radiusInMiles = STARTING_MILES_RADIUS;
 
   List<Sight> recommendedSights = [];
+  List<Coordinate> coordinates = [];
 
   void recommendedToSelected(int index) {
     setState(() {
@@ -368,6 +376,7 @@ class _MapPageState extends State<MapPage> {
                           urlTemplate:
                               'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         ),
+                        /*
                         CircleLayer(
                           circles: [
                             CircleMarker(
@@ -380,12 +389,13 @@ class _MapPageState extends State<MapPage> {
                             ),
                           ],
                         ),
+                        */
                         CircleLayer(
-                          circles: currentJourney.sights().map((Sight sight) => CircleMarker(
+                          circles: coordinates.map((Coordinate coordinate) => CircleMarker(
                               borderStrokeWidth: 3,
                               color: const Color.fromARGB(50, 158, 28, 181),
-                              borderColor: const Color.fromARGB(255, 106, 0, 124),
-                              point: sight.getCoordinate().toLatLng(),
+                              borderColor: const Color.fromARGB(0, 255, 255, 255),
+                              point: coordinate.toLatLng(),
                               radius: radiusInMiles * METERS_IN_A_MILE,
                               useRadiusInMeter: true,
                           )).toList(),
@@ -430,7 +440,7 @@ class _MapPageState extends State<MapPage> {
               Center(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       children: [
@@ -449,8 +459,8 @@ class _MapPageState extends State<MapPage> {
                               controller: topTextController,
                               decoration: InputDecoration(
                                   hintText: _showBottomTextField
-                                      ? "  Start of route"
-                                      : "  Center of route"),
+                                      ? "Start of route"
+                                      : "Center of route"),
                             ),
                           ),
                         ),
@@ -471,20 +481,22 @@ class _MapPageState extends State<MapPage> {
                                 },
                                 controller: bottomTextController,
                                 decoration: const InputDecoration(
-                                    hintText: "  Destination"),
+                                    hintText: "Destination"),
                               ),
                             ),
                           ),
                         )
                       ],
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: AnimatedRotation(
-                        turns: _turnsShowBottomTextFieldButton,
-                        duration: const Duration(milliseconds: 400),
-                        child: Card(
-                          child: IconButton(
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(0, 0, MediaQuery.of(context).size.width / 30, 0),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: AnimatedRotation(
+                          turns: _turnsShowBottomTextFieldButton,
+                          duration: const Duration(milliseconds: 400),
+                          child: Card(
+                            child: IconButton(
                               onPressed: () {
                                 setState(() {
                                   _showBottomTextField = !_showBottomTextField;
@@ -494,6 +506,7 @@ class _MapPageState extends State<MapPage> {
                               },
                               icon: const Icon(
                                   Icons.keyboard_arrow_left_outlined)),
+                          ),
                         ),
                       ),
                     ),
@@ -501,11 +514,11 @@ class _MapPageState extends State<MapPage> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 9, 0),
+                padding: EdgeInsets.fromLTRB(0, 0, MediaQuery.of(context).size.width / 30, 0),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(
-                    width: 56,
+                    width: 55,
                     height: MediaQuery.of(context).size.height * 0.4,
                     child: Column(
                       children: [

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:developer'; // for log()
 
 import 'package:seymour_app/Common/Models/sight.dart';
+import 'package:seymour_app/Common/Queries/get_filters.dart';
 
 final flutterOverpass = FlutterOverpass();
 
@@ -13,7 +14,8 @@ Future<List<Sight>> getSights(LatLng center, double radius) async {
   final queryResult = await flutterOverpass.rawOverpassQL(
       query: "node(around:$radius,${center.latitude},${center.longitude});");
 
-  log(queryResult.toString());
+  //log(queryResult.toString());
+  getFilters();
 
   List<Sight> nearby = [];
 

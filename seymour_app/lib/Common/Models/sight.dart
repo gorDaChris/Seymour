@@ -29,4 +29,13 @@ class Sight {
   String? getWikipediaTitle() {
     return _wikipediaTitle;
   }
+
+  factory Sight.fromJson(Map<String, dynamic> json) {
+    return Sight(
+      _name = json['name'],
+      _tourismType = json['tourismType'],
+      _coordinate = Coordinate.fromJsonAzure(json['coordinate']),
+      _wikipediaTitle = json['wikipediaTitle'],
+    );
+  }
 }

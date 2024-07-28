@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:seymour_app/Views/map_page.dart';
 
 /*
- * The generic layout of this page was generated with the assistance of GPT-4 and has since been modified. 
- * 
+ * The generic layout of this page was generated with the assistance of GPT-4 and has since been modified.
+ *
  * The following prompt was used:
- * "I am designing a page to save items using flutter. I want a button at the bottom left to "save" 
- * placeholder items, so that when it is clicked, a keyboard will appear and after selecting confirm, 
- * a new row with the entered name will appear. There will also be a button on the bottom right, that 
+ * "I am designing a page to save items using flutter. I want a button at the bottom left to "save"
+ * placeholder items, so that when it is clicked, a keyboard will appear and after selecting confirm,
+ * a new row with the entered name will appear. There will also be a button on the bottom right, that
  * does not have to do anything at the moment. Can you generate a dart file that will get me this page?"
  */
 
@@ -19,7 +22,7 @@ class SavePage extends StatefulWidget {
 
 class _SavePageState extends State<SavePage> {
   // TODO: list of Row Widgets
-  List<String> items = [];
+  List items = [];
   final TextEditingController _textController = TextEditingController();
 
   // TODO: click row widget to expand options
@@ -56,6 +59,16 @@ class _SavePageState extends State<SavePage> {
         );
       },
     );
+  }
+
+  // TODO: Verify that this is working
+  // TODO: System popup with load export delete
+  // TODO: Review the toJson code in other areas. Implement here as well
+  void _listJourneyFiles() async {
+    directory = (await getApplicationDocumentsDirectory()).path;
+    setState(() {
+      items = io.Directory("$directory/journeys/").listSync();
+    });
   }
 
   @override

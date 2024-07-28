@@ -276,7 +276,7 @@ class _MapPageState extends State<MapPage> {
     coordinates = coordinates
         .asMap()
         .entries
-        .where((entry) => (entry.key + 1) % 5 == 0)
+        .where((entry) => (entry.key + 1) % 10 == 0)
         .map((entry) => entry.value)
         .toList();
 

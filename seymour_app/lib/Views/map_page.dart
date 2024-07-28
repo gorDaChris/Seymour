@@ -14,6 +14,7 @@ import 'package:seymour_app/Common/Queries/sights_by_radius.dart';
 import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
 import 'package:seymour_app/Views/navigation_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Journey currentJourney = Journey();
 
@@ -267,20 +268,26 @@ class _MapPageState extends State<MapPage> {
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
 
     // Compile points along route and then getSights for each point
-    for(var leg in currentJourney.route!.legs) {
+    for (var leg in currentJourney.route!.legs) {
       coordinates.addAll(leg.points);
     }
-    
 
     // Shorten list of coordinates for efficiency
-    coordinates = coordinates.asMap().entries.where((entry) => (entry.key + 1) % 5 == 0).map((entry) => entry.value).toList();
+    coordinates = coordinates
+        .asMap()
+        .entries
+        .where((entry) => (entry.key + 1) % 5 == 0)
+        .map((entry) => entry.value)
+        .toList();
 
-
-    List<Future<List<Sight>>> predetSightFutures = coordinates.map((coordinate) => getSights(coordinate.toLatLng(), radiusInMiles * METERS_IN_A_MILE)).toList();
+    List<Future<List<Sight>>> predetSightFutures = coordinates
+        .map((coordinate) =>
+            getSights(coordinate.toLatLng(), radiusInMiles * METERS_IN_A_MILE))
+        .toList();
     List<List<Sight>> predetSights = await Future.wait(predetSightFutures);
 
     // transfer all sights to recommendedSights
-    for(List<Sight> sights in predetSights) {
+    for (List<Sight> sights in predetSights) {
       recommendedSights.addAll(sights);
     }
 
@@ -391,42 +398,58 @@ class _MapPageState extends State<MapPage> {
                         ),
                         */
                         CircleLayer(
-                          circles: coordinates.map((Coordinate coordinate) => CircleMarker(
-                              borderStrokeWidth: 3,
-                              color: const Color.fromARGB(50, 158, 28, 181),
-                              borderColor: const Color.fromARGB(0, 255, 255, 255),
-                              point: coordinate.toLatLng(),
-                              radius: radiusInMiles * METERS_IN_A_MILE,
-                              useRadiusInMeter: true,
-                          )).toList(),
+                          circles: coordinates
+                              .map((Coordinate coordinate) => CircleMarker(
+                                    borderStrokeWidth: 3,
+                                    color:
+                                        const Color.fromARGB(50, 158, 28, 181),
+                                    borderColor:
+                                        const Color.fromARGB(0, 255, 255, 255),
+                                    point: coordinate.toLatLng(),
+                                    radius: radiusInMiles * METERS_IN_A_MILE,
+                                    useRadiusInMeter: true,
+                                  ))
+                              .toList(),
                         ),
                         MarkerLayer(
-                          markers: currentJourney.sights().map((Sight sight) => Marker(
+                          markers: currentJourney
+                              .sights()
+                              .map((Sight sight) => Marker(
                                   point: sight.getCoordinate().toLatLng(),
                                   child: CustomPopup(
                                       content: SizedBox(
                                           width: 200,
-                                          height: 100,
+                                          height: 200,
                                           child: Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
                                               children: <Widget>[
                                                 Text(sight.name(),
-                                                    textScaler: const TextScaler.linear(1.2)),
-                                                const ElevatedButton(
-                                                    onPressed: null,
-                                                    child: Text("Open in Wikipedia")
-                                                )
-                                              ]
-                                          )
-                                      ),
+                                                    textScaler:
+                                                        const TextScaler.linear(
+                                                            1.2)),
+                                                ElevatedButton(
+                                                    child: const Text(
+                                                        "Open in Wikipedia"),
+                                                    onPressed:
+                                                        sight.getWikipediaTitle() ==
+                                                                null
+                                                            ? null
+                                                            : () async {
+                                                                await launchUrl(
+                                                                    Uri.https(
+                                                                        "en.wikipedia.org",
+                                                                        "/wiki/${sight.getWikipediaTitle()}"),
+                                                                    mode: LaunchMode
+                                                                        .inAppBrowserView);
+                                                              })
+                                              ])),
                                       child: const Icon(
                                         Icons.location_pin,
                                         size: 30,
                                         color: Colors.red,
-                                      )
-                                  )
-                          )).toList(),
+                                      ))))
+                              .toList(),
                         ),
                         PolylineLayer(polylines: [...routeLines]),
                       ]);
@@ -489,7 +512,8 @@ class _MapPageState extends State<MapPage> {
                       ],
                     ),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, MediaQuery.of(context).size.width / 30, 0),
+                      padding: EdgeInsets.fromLTRB(
+                          0, 0, MediaQuery.of(context).size.width / 30, 0),
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: AnimatedRotation(
@@ -497,15 +521,16 @@ class _MapPageState extends State<MapPage> {
                           duration: const Duration(milliseconds: 400),
                           child: Card(
                             child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  _showBottomTextField = !_showBottomTextField;
-                                  _turnsShowBottomTextFieldButton +=
-                                      0.25 * (_showBottomTextField ? -1 : 1);
-                                });
-                              },
-                              icon: const Icon(
-                                  Icons.keyboard_arrow_left_outlined)),
+                                onPressed: () {
+                                  setState(() {
+                                    _showBottomTextField =
+                                        !_showBottomTextField;
+                                    _turnsShowBottomTextFieldButton +=
+                                        0.25 * (_showBottomTextField ? -1 : 1);
+                                  });
+                                },
+                                icon: const Icon(
+                                    Icons.keyboard_arrow_left_outlined)),
                           ),
                         ),
                       ),
@@ -514,7 +539,8 @@ class _MapPageState extends State<MapPage> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, MediaQuery.of(context).size.width / 30, 0),
+                padding: EdgeInsets.fromLTRB(
+                    0, 0, MediaQuery.of(context).size.width / 30, 0),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(

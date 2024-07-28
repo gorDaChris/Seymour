@@ -3,8 +3,18 @@ import 'dart:convert';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart';
 
-void readWikipediaArticleAloud(String articleName) async {
-  articleName = articleName.substring(3);
+Future<void> readWikipediaArticleAloud(String articleNameWithPrefix) async {
+  var articleName = articleNameWithPrefix.substring(3);
+  String textToRead = await getArticleText(articleName);
+
+  FlutterTts flutterTts = FlutterTts();
+
+  print(textToRead);
+
+  flutterTts.speak(textToRead);
+}
+
+Future<String> getArticleText(String articleName) async {
   print(articleName);
 
   Response response = await get(Uri.https("en.wikipedia.org", "/w/api.php", {
@@ -24,12 +34,7 @@ void readWikipediaArticleAloud(String articleName) async {
 
   String textToRead = jsonObject["query"]["pages"][0]["extract"];
   print(textToRead);
-  textToRead = textToRead.replaceAll("\n", "");
-
-  FlutterTts flutterTts = FlutterTts();
-
-  print(textToRead);
-
-  await flutterTts.speak("Hello World!");
-  flutterTts.speak(textToRead);
+  textToRead = textToRead.replaceAll("\n", " ");
+  textToRead = textToRead.replaceAll("==", "");
+  return textToRead;
 }

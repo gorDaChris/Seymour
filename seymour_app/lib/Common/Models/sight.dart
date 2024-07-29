@@ -1,5 +1,4 @@
 import 'package:seymour_app/Common/Models/coordinate.dart';
-import 'package:flutter_overpass/flutter_overpass.dart';
 
 ///
 /// WIP
@@ -10,7 +9,7 @@ class Sight {
   final String? _artworkType;
   final Coordinate _coordinate;
 
-  String? _wikipediaTitle;
+  final String? _wikipediaTitle;
 
   Sight(this._name, this._coordinate, this._tourismType, this._artworkType, this._wikipediaTitle);
 

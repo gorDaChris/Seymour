@@ -7,11 +7,12 @@ import 'package:flutter_overpass/flutter_overpass.dart';
 class Sight {
   final String _name;
   final String _tourismType;
+  final String? _artworkType;
   final Coordinate _coordinate;
 
   String? _wikipediaTitle;
 
-  Sight(this._name, this._coordinate, this._tourismType, this._wikipediaTitle);
+  Sight(this._name, this._coordinate, this._tourismType, this._artworkType, this._wikipediaTitle);
 
   @override
   String toString() {
@@ -28,5 +29,9 @@ class Sight {
 
   String? getWikipediaTitle() {
     return _wikipediaTitle;
+  }
+
+  bool isArtwork() {
+    return _artworkType != null;
   }
 }

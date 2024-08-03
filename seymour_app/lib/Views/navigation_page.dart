@@ -44,7 +44,7 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   CircleMarker userLocationMarker =
-      CircleMarker(point: LatLng(0, 0), radius: 10);
+      const CircleMarker(point: LatLng(0, 0), radius: 10);
 
   void interpretLocation(LocationData data) {
     displayUserLocationCircle(data);
@@ -63,7 +63,7 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   void changeCurrentInstructionIfNeeded(LocationData data) {
-    double userDistanceFromNextStepMeters = Distance().as(
+    double userDistanceFromNextStepMeters = const Distance().as(
         LengthUnit.Meter,
         LatLng(data.latitude!, data.longitude!),
         currentInstruction.point.toLatLng());
@@ -82,6 +82,17 @@ class _NavigationPageState extends State<NavigationPage> {
       });
       print(currentInstruction.maneuver);
     }
+  }
+
+  String getDistanceToDisplay(LatLng source, LatLng dest) {
+    double dist = const Distance().as(
+        LengthUnit.Meter,
+        source,
+        dest);
+        
+    int time = ((dist / 1.34) / 60).floor();
+
+    return dist.toString() + "m   " + time.toString() + "mins";
   }
 
   late StreamSubscription<LocationData> locationStreamSubscription;
@@ -146,11 +157,6 @@ class _NavigationPageState extends State<NavigationPage> {
                               .map((Sight sight) => Marker(
                                   point: sight.getCoordinate().toLatLng(),
                                   child: CustomPopup(
-                                      child: Icon(
-                                        Icons.location_pin,
-                                        size: 30,
-                                        color: Colors.red,
-                                      ),
                                       content: SizedBox(
                                           width: 200,
                                           height: 200,
@@ -164,8 +170,6 @@ class _NavigationPageState extends State<NavigationPage> {
                                                     textScaler:
                                                         TextScaler.linear(1.2)),
                                                 ElevatedButton(
-                                                    child: const Text(
-                                                        "Open in Wikipedia"),
                                                     onPressed:
                                                         sight.getWikipediaTitle() ==
                                                                 null
@@ -177,7 +181,9 @@ class _NavigationPageState extends State<NavigationPage> {
                                                                         "/wiki/${sight.getWikipediaTitle()}"),
                                                                     mode: LaunchMode
                                                                         .inAppBrowserView);
-                                                              }),
+                                                              },
+                                                    child: const Text("Open in Wikipedia"),
+                                                ),
                                                 ElevatedButton(
                                                     onPressed:
                                                         sight.getWikipediaTitle() ==
@@ -190,8 +196,28 @@ class _NavigationPageState extends State<NavigationPage> {
                                                               },
                                                     child: const Text(
                                                         "Read wikipedia audio guide aloud"))
-                                              ])))))
-                              .toList(),
+                                              ])
+                                            ),
+                                        child: const Icon(
+                                          Icons.location_pin,
+                                          size: 30,
+                                          color: Colors.red,
+                                        ),
+                                      )
+                                    )
+                                  ).toList(),
+                        ),
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: currentJourney.route!.legs.last.points.last.toLatLng(),
+                              child: const Icon(
+                                Icons.flag_circle,
+                                size: 30,
+                                color: Colors.red,
+                              )
+                            ),
+                          ],
                         ),
                       ]);
                 }
@@ -228,6 +254,17 @@ class _NavigationPageState extends State<NavigationPage> {
                               textScaler: TextScaler.linear(1.2)),
 
                           // Text("Example Dr.", textScaler: TextScaler.linear(1.5))
+                        ]),
+
+                    Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                              //TODO: put distance and time here
+                              getDistanceToDisplay(currentJourney
+                            .route!.legs.first.points.first.toLatLng(), currentJourney
+                            .route!.legs.last.points.last.toLatLng()),
+                              textScaler: TextScaler.linear(1.2)),
                         ]),
                     ElevatedButton(
                         child: const Text("Go back"),

@@ -383,20 +383,6 @@ class _MapPageState extends State<MapPage> {
                           urlTemplate:
                               'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         ),
-                        /*
-                        CircleLayer(
-                          circles: [
-                            CircleMarker(
-                              borderStrokeWidth: 3,
-                              color: const Color.fromARGB(50, 158, 28, 181),
-                              borderColor: const Color.fromARGB(255, 106, 0, 124),
-                              point: center,
-                              radius: radiusInMiles * METERS_IN_A_MILE,
-                              useRadiusInMeter: true,
-                            ),
-                          ],
-                        ),
-                        */
                         CircleLayer(
                           circles: coordinates
                               .map((Coordinate coordinate) => CircleMarker(
@@ -410,6 +396,18 @@ class _MapPageState extends State<MapPage> {
                                     useRadiusInMeter: true,
                                   ))
                               .toList(),
+                        ),
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: currentJourney.route!.legs.last.points.last.toLatLng(),
+                              child: const Icon(
+                                Icons.flag_circle,
+                                size: 30,
+                                color: Colors.red,
+                              )
+                            ),
+                          ],
                         ),
                         MarkerLayer(
                           markers: currentJourney

@@ -54,6 +54,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   bool firstBuild = true;
+  bool sightsChanged = false;
 
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
@@ -119,6 +120,8 @@ class _MapPageState extends State<MapPage> {
       _sideButtons.add(Card(
         child: IconButton(
           onPressed: () {
+            getNearbySights();
+            sightsChanged = false;
             navigateToNavigationPage();
           },
           icon: const Icon(Icons.navigation),
@@ -132,6 +135,7 @@ class _MapPageState extends State<MapPage> {
           onPressed: () {
             // TODO: Note this is TEMPORARY BEHAVIOR!
             getNearbySights();
+            sightsChanged = false;
           },
           icon: const Icon(Icons.map),
         ),
@@ -325,6 +329,7 @@ class _MapPageState extends State<MapPage> {
 
   void recommendedToSelected(int index) {
     setState(() {
+      sightsChanged = true;
       currentJourney.addSight(recommendedSights.removeAt(index));
     });
   }

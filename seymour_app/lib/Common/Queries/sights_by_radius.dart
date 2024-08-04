@@ -3,7 +3,6 @@ import 'package:flutter_overpass/flutter_overpass.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'dart:async';
-import 'dart:developer'; // for log()
 
 import 'package:seymour_app/Common/Models/sight.dart';
 
@@ -12,8 +11,6 @@ final flutterOverpass = FlutterOverpass();
 Future<List<Sight>> getSights(LatLng center, double radius) async {
   final queryResult = await flutterOverpass.rawOverpassQL(
       query: "node(around:$radius,${center.latitude},${center.longitude});");
-
-  log(queryResult.toString());
 
   List<Sight> nearby = [];
 

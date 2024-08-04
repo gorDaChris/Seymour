@@ -80,6 +80,7 @@ class _NavigationPageState extends State<NavigationPage> {
         currentInstruction =
             currentJourney.route!.guidance.instructions[instructionIndex];
       });
+      FlutterTts().speak(formatInstructionMessage(currentInstruction.message)!);
       print(currentInstruction.maneuver);
     }
   }
@@ -92,7 +93,7 @@ class _NavigationPageState extends State<NavigationPage> {
     //A route must exist before we get to this page
     routeLines = currentJourney.route!.drawRoute();
 
-    Location().changeSettings(interval: 20000);
+    Location().changeSettings(interval: 2000);
 
     locationStreamSubscription =
         Location().onLocationChanged.listen(interpretLocation);

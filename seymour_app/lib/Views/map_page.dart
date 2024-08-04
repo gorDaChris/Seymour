@@ -54,6 +54,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   bool firstBuild = true;
+  bool sightsChanged = false;
 
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
@@ -118,7 +119,17 @@ class _MapPageState extends State<MapPage> {
 
       _sideButtons.add(Card(
         child: IconButton(
-          onPressed: () {
+          onPressed: () async {
+            getNearbySights();
+            if (sightsChanged) {
+              currentJourney.route = await coordinatesToRoute(
+                  currentJourney
+                      .sights()
+                      .map((Sight s) => s.getCoordinate())
+                      .toList(),
+                  _showBottomTextField);
+            }
+            sightsChanged = false;
             navigateToNavigationPage();
           },
           icon: const Icon(Icons.navigation),
@@ -132,6 +143,7 @@ class _MapPageState extends State<MapPage> {
           onPressed: () {
             // TODO: Note this is TEMPORARY BEHAVIOR!
             getNearbySights();
+            sightsChanged = false;
           },
           icon: const Icon(Icons.map),
         ),
@@ -326,12 +338,14 @@ class _MapPageState extends State<MapPage> {
 
   void recommendedToSelected(int index) {
     setState(() {
+      sightsChanged = true;
       currentJourney.addSight(recommendedSights.removeAt(index));
     });
   }
 
   void selectedToRecommended(int index) {
     setState(() {
+      sightsChanged = true;
       recommendedSights.add(currentJourney.removeSight(index));
     });
   }
@@ -412,6 +426,19 @@ class _MapPageState extends State<MapPage> {
                                   ))
                               .toList(),
                         ),
+                        if (currentJourney.route != null) 
+                          MarkerLayer(
+                            markers: [
+                              Marker(
+                                point: currentJourney.route!.legs.last.points.last.toLatLng(),
+                                child: const Icon(
+                                  Icons.flag_circle,
+                                  size: 30,
+                                  color: Colors.red,
+                                )
+                              ),
+                            ],
+                          ),
                         MarkerLayer(
                           markers: currentJourney
                               .sights()

@@ -5,10 +5,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:seymour_app/Common/Models/filtered_tags.dart';
 import 'package:seymour_app/Common/Models/tag.dart';
 import 'package:seymour_app/Common/Queries/get_filters.dart';
+import 'package:seymour_app/Views/map_page.dart';
 
 // DEV
 // import 'dart:developer';
-
 
 class SurveyPage extends StatefulWidget {
   const SurveyPage({
@@ -49,7 +49,10 @@ class _SurveyPageState extends State<SurveyPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () async {
             Navigator.pop(context);
-            await widget.getNearbySights();
+            if (settingsChanged) {
+              settingsChanged = false;
+              await widget.getNearbySights();
+            }
           },
         ),
       ),
@@ -75,6 +78,7 @@ class _SurveyPageState extends State<SurveyPage> {
                 content: Text('Successfully saved changes.'),
               ),
             );
+            settingsChanged = true;
           }).catchError((error) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

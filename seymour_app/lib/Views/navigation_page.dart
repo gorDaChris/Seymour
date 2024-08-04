@@ -68,7 +68,7 @@ class _NavigationPageState extends State<NavigationPage> {
         LatLng(data.latitude!, data.longitude!),
         currentInstruction.point.toLatLng());
 
-    if (userDistanceFromNextStepMeters <= 20) {
+    if (userDistanceFromNextStepMeters <= 30) {
       instructionIndex++;
       if (instructionIndex >=
           currentJourney.route!.guidance.instructions.length) {
@@ -85,15 +85,11 @@ class _NavigationPageState extends State<NavigationPage> {
     }
   }
 
-  String getDistanceToDisplay(LatLng source, LatLng dest) {
-    double dist = const Distance().as(
-        LengthUnit.Meter,
-        source,
-        dest);
-        
-    int time = ((dist / 1.34) / 60).floor();
+  String getNavigationInfo() {
+    int distance = currentJourney.route!.summary.lengthInMeters - currentJourney.route!.guidance.instructions[instructionIndex].routeOffsetInMeters;
+    int time = currentJourney.route!.summary.travelTimeInSeconds - currentJourney.route!.guidance.instructions[instructionIndex].travelTimeInSeconds;
 
-    return dist.toString() + "m   " + time.toString() + "mins";
+    return "${distance}m   ${(time / 60).floor()}mins";
   }
 
   late StreamSubscription<LocationData> locationStreamSubscription;
@@ -252,20 +248,10 @@ class _NavigationPageState extends State<NavigationPage> {
                               formatInstructionMessage(
                                       currentInstruction.street) ??
                                   "",
-                              textScaler: TextScaler.linear(1.2)),
-
-                          // Text("Example Dr.", textScaler: TextScaler.linear(1.5))
-                        ]),
-
-                    Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
+                                  textScaler: TextScaler.linear(1.2)),
                           Text(
-                              //TODO: put distance and time here
-                              getDistanceToDisplay(currentJourney
-                            .route!.legs.first.points.first.toLatLng(), currentJourney
-                            .route!.legs.last.points.last.toLatLng()),
-                              textScaler: TextScaler.linear(1.2)),
+                              getNavigationInfo(),
+                              textScaler: const TextScaler.linear(1.2)),
                         ]),
                     ElevatedButton(
                         child: const Text("Go back"),
@@ -274,8 +260,8 @@ class _NavigationPageState extends State<NavigationPage> {
                         })
                   ]))),
       floatingActionButton:
-          ElevatedButton(child: Icon(Icons.stop), onPressed: FlutterTts().stop),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          ElevatedButton(onPressed: FlutterTts().stop, child: const Icon(Icons.stop)),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
     );
   }
 }

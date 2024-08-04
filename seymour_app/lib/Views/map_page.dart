@@ -95,12 +95,24 @@ class _MapPageState extends State<MapPage> {
       _sideButtons.add(Card(
         child: IconButton(
           onPressed: () async {
-            currentJourney.route = await coordinatesToRoute(
+            if(bottomCoordinate != null) {
+              currentJourney.route = await coordinatesToRoute(
+                  currentJourney
+                      .sights()
+                      .map((Sight s) => s.getCoordinate())
+                      .toList()..insert(0, topCoordinate!)..add(bottomCoordinate!),
+                  _showBottomTextField);
+            }
+            // When it is a center point
+            else
+            {
+              currentJourney.route = await coordinatesToRoute(
                 currentJourney
                     .sights()
                     .map((Sight s) => s.getCoordinate())
                     .toList(),
                 _showBottomTextField);
+            }
 
             setState(() {
               routeLines = currentJourney.route!.drawRoute();
@@ -132,7 +144,7 @@ class _MapPageState extends State<MapPage> {
                   currentJourney
                       .sights()
                       .map((Sight s) => s.getCoordinate())
-                      .toList(),
+                      .toList()..insert(0, topCoordinate!)..add(bottomCoordinate!),
                   _showBottomTextField);
             }
             sightsChanged = false;

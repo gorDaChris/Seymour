@@ -103,7 +103,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text("No nearby sights"),
+                      Text("No sights selected"),
                     ]
                 )
             )

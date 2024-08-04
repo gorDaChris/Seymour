@@ -18,9 +18,8 @@ class SurveyPage extends StatefulWidget {
 }
 
 class _SurveyPageState extends State<SurveyPage> {
+  // TODO: read from file on load
   List<Tag> tags = FilteredTags.tags.values.toList();
-  //List<bool?> checkedItems = List<bool?>.generate(33, (index) => false);
-
 
   Future<void> _saveCheckedItems() async {
     try {

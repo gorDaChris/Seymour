@@ -17,7 +17,7 @@ Future<bool> matchesFilters(dynamic node) async {
   }
 
   if (node["tags"]["tourism"] == "artwork") {
-
+    /// If the sight is of type "artwork", then filter based on artwork type
     if (FilteredTags.tags[node["tags"]["artwork_type"]] != null &&
         FilteredTags.tags[node["tags"]["artwork_type"]]!.filtered) { 
       return true;
@@ -35,7 +35,6 @@ Future<List<Sight>> getSights(LatLng center, double radius) async {
   final queryResult = await flutterOverpass.rawOverpassQL(
       query: "node(around:$radius,${center.latitude},${center.longitude});");
 
-  //log(queryResult.toString());
   List<Sight> nearby = [];
 
   for (dynamic node in queryResult["elements"]) {
@@ -57,9 +56,5 @@ Future<List<Sight>> getSights(LatLng center, double radius) async {
       }
     }
   }
-
-  // DEBUG
-  // log(nearby.toString());
-
   return nearby;
 }

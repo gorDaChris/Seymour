@@ -1,5 +1,6 @@
 import 'package:seymour_app/Common/Models/tag.dart';
 
+/// Tags are filtered TRUE by default 
 class FilteredTags {
   static final Map<String, Tag> tags = {
     'sculpture': Tag( displayName: 'Sculpture', artwork: true, filtered: true),

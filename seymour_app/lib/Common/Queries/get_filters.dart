@@ -8,13 +8,13 @@ import 'dart:convert';
 import 'package:seymour_app/Common/Models/filtered_tags.dart';
 import 'package:seymour_app/Common/Models/tag.dart'; 
 
-Future<File> get _localFile async {
+Future<File> get localFile async {
   final directory = await getApplicationDocumentsDirectory();
   return File('${directory.path}/tags.json');
 }
 
 Future<Map<String, Tag>> setFiltersInternal() async {
-  final file = await _localFile;
+  final file = await localFile;
   String filtersRaw = await file.readAsString();
   var jsonObject = jsonDecode(filtersRaw);
 
@@ -28,5 +28,4 @@ Future<Map<String, Tag>> setFiltersInternal() async {
   }
 
   return FilteredTags.tags;
-
 }

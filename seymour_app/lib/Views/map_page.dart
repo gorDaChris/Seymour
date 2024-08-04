@@ -262,35 +262,34 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> getNearbySights() async {
-    // TODO: filter sights & store filtered list
-
     recommendedSights =
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
 
-    // Compile points along route and then getSights for each point
-    for (var leg in currentJourney.route!.legs) {
-      coordinates.addAll(leg.points);
+    // Add recommend sights to predetermined sights
+    if (currentJourney.route != null) {
+      // Compile points along route and then getSights for each point
+      for (var leg in currentJourney.route!.legs) {
+        coordinates.addAll(leg.points);
+      }
+
+      // Shorten list of coordinates for efficiency
+      coordinates = coordinates
+          .asMap()
+          .entries
+          .where((entry) => (entry.key + 1) % 10 == 0)
+          .map((entry) => entry.value)
+          .toList();
+
+      List<Future<List<Sight>>> predetSightFutures = coordinates
+          .map((coordinate) =>
+              getSights(coordinate.toLatLng(), radiusInMiles * METERS_IN_A_MILE))
+          .toList();
+      List<List<Sight>> predetSights = await Future.wait(predetSightFutures);
+      // transfer all sights to recommendedSights
+      for (List<Sight> sights in predetSights) {
+        recommendedSights.addAll(sights);
+      }
     }
-
-    // Shorten list of coordinates for efficiency
-    coordinates = coordinates
-        .asMap()
-        .entries
-        .where((entry) => (entry.key + 1) % 10 == 0)
-        .map((entry) => entry.value)
-        .toList();
-
-    List<Future<List<Sight>>> predetSightFutures = coordinates
-        .map((coordinate) =>
-            getSights(coordinate.toLatLng(), radiusInMiles * METERS_IN_A_MILE))
-        .toList();
-    List<List<Sight>> predetSights = await Future.wait(predetSightFutures);
-
-    // transfer all sights to recommendedSights
-    for (List<Sight> sights in predetSights) {
-      recommendedSights.addAll(sights);
-    }
-
     setState(() {});
   }
 
@@ -383,7 +382,6 @@ class _MapPageState extends State<MapPage> {
                           urlTemplate:
                               'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         ),
-                        /*
                         CircleLayer(
                           circles: [
                             CircleMarker(
@@ -396,7 +394,7 @@ class _MapPageState extends State<MapPage> {
                             ),
                           ],
                         ),
-                        */
+                        /*
                         CircleLayer(
                           circles: coordinates
                               .map((Coordinate coordinate) => CircleMarker(
@@ -411,6 +409,7 @@ class _MapPageState extends State<MapPage> {
                                   ))
                               .toList(),
                         ),
+                        */
                         MarkerLayer(
                           markers: currentJourney
                               .sights()

@@ -265,9 +265,8 @@ class _MapPageState extends State<MapPage> {
     recommendedSights =
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
 
-    // Add recommend sights to predetermined sights
+    // Compile points along route and then getSights for each point
     if (currentJourney.route != null) {
-      // Compile points along route and then getSights for each point
       for (var leg in currentJourney.route!.legs) {
         coordinates.addAll(leg.points);
       }
@@ -279,17 +278,18 @@ class _MapPageState extends State<MapPage> {
           .where((entry) => (entry.key + 1) % 10 == 0)
           .map((entry) => entry.value)
           .toList();
-
-      List<Future<List<Sight>>> predetSightFutures = coordinates
-          .map((coordinate) =>
-              getSights(coordinate.toLatLng(), radiusInMiles * METERS_IN_A_MILE))
-          .toList();
-      List<List<Sight>> predetSights = await Future.wait(predetSightFutures);
-      // transfer all sights to recommendedSights
-      for (List<Sight> sights in predetSights) {
-        recommendedSights.addAll(sights);
-      }
     }
+    List<Future<List<Sight>>> predetSightFutures = coordinates
+        .map((coordinate) =>
+            getSights(coordinate.toLatLng(), radiusInMiles * METERS_IN_A_MILE))
+        .toList();
+    List<List<Sight>> predetSights = await Future.wait(predetSightFutures);
+
+    // transfer all sights to recommendedSights
+    for (List<Sight> sights in predetSights) {
+      recommendedSights.addAll(sights);
+    }
+
     setState(() {});
   }
 
@@ -382,19 +382,20 @@ class _MapPageState extends State<MapPage> {
                           urlTemplate:
                               'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         ),
-                        CircleLayer(
-                          circles: [
-                            CircleMarker(
-                              borderStrokeWidth: 3,
-                              color: const Color.fromARGB(50, 158, 28, 181),
-                              borderColor: const Color.fromARGB(255, 106, 0, 124),
-                              point: center,
-                              radius: radiusInMiles * METERS_IN_A_MILE,
-                              useRadiusInMeter: true,
-                            ),
-                          ],
-                        ),
-                        /*
+                        if (!_showBottomTextField)
+                          CircleLayer(
+                            circles: [
+                              CircleMarker(
+                                borderStrokeWidth: 3,
+                                color: const Color.fromARGB(50, 158, 28, 181),
+                                borderColor:
+                                    const Color.fromARGB(255, 106, 0, 124),
+                                point: center,
+                                radius: radiusInMiles * METERS_IN_A_MILE,
+                                useRadiusInMeter: true,
+                              ),
+                            ],
+                          ),
                         CircleLayer(
                           circles: coordinates
                               .map((Coordinate coordinate) => CircleMarker(
@@ -409,7 +410,6 @@ class _MapPageState extends State<MapPage> {
                                   ))
                               .toList(),
                         ),
-                        */
                         MarkerLayer(
                           markers: currentJourney
                               .sights()

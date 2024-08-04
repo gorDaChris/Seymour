@@ -351,6 +351,7 @@ class _MapPageState extends State<MapPage> {
         recommendedToSelected: recommendedToSelected,
         selectedToRecommended: selectedToRecommended,
         recommendedSights: recommendedSights,
+        getNearbySights: getNearbySights,
         onRadiusChanged: (radiusMiles) async {
           settingsChanged = true;
           setState(() {

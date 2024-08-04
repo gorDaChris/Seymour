@@ -13,7 +13,8 @@ class DraggableMenu extends StatefulWidget {
       this.onRadiusChanged,
       required this.recommendedSights,
       required this.recommendedToSelected,
-      required this.selectedToRecommended});
+      required this.selectedToRecommended,
+      required this.getNearbySights});
 
   final Widget backgroundChild;
 
@@ -23,6 +24,7 @@ class DraggableMenu extends StatefulWidget {
 
   final void Function(int) recommendedToSelected;
   final void Function(int) selectedToRecommended;
+  final Future<void> Function() getNearbySights;
 
   @override
   State<DraggableMenu> createState() => _DraggableMenuState();
@@ -31,9 +33,11 @@ class DraggableMenu extends StatefulWidget {
 class _DraggableMenuState extends State<DraggableMenu> {
   double radius = 0.5;
 
-  void navigateToSurveyPage() {
+  void navigateToSurveyPage(Future<void> Function() getNearbySights) {
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const SurveyPage()));
+        .push(MaterialPageRoute(builder: (context) => SurveyPage(
+          getNearbySights: getNearbySights
+        )));
   }
 
   @override
@@ -63,7 +67,7 @@ class _DraggableMenuState extends State<DraggableMenu> {
           ElevatedButton(
             child: const Text("Adjust Filters"),
             onPressed: () {
-              navigateToSurveyPage();
+              navigateToSurveyPage(widget.getNearbySights);
             },
           ),
           Row(

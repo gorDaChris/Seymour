@@ -11,7 +11,12 @@ import 'package:seymour_app/Common/Queries/get_filters.dart';
 
 
 class SurveyPage extends StatefulWidget {
-  const SurveyPage({super.key});
+  const SurveyPage({
+    super.key,
+    required this.getNearbySights
+  });
+
+  final Future<void> Function() getNearbySights;
 
   @override
   State<SurveyPage> createState() => _SurveyPageState();
@@ -39,7 +44,15 @@ class _SurveyPageState extends State<SurveyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            Navigator.pop(context);
+            await widget.getNearbySights();
+          },
+        ),
+      ),
       body: ListView.builder(
         itemBuilder: (context, index) {
           return CheckboxListTile(

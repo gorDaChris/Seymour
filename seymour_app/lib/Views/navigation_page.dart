@@ -97,6 +97,8 @@ class _NavigationPageState extends State<NavigationPage> {
 
     locationStreamSubscription =
         Location().onLocationChanged.listen(interpretLocation);
+
+    FlutterTts().speak(formatInstructionMessage(currentInstruction.message)!);
   }
 
   List<Polyline<Object>> routeLines = [];

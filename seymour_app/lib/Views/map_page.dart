@@ -45,6 +45,8 @@ Future<LocationData?> currentLocation() async {
   return await location.getLocation();
 }
 
+bool settingsChanged = false;
+
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -54,6 +56,9 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   bool firstBuild = true;
+
+  // Amount of time elapsed after changing settings to fetch sights
+  final Duration settingsDuration = const Duration(seconds: 5);
 
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
@@ -220,6 +225,8 @@ class _MapPageState extends State<MapPage> {
       topCoordinate = await getCoordinateFromAddress(topTextController.text);
       _mapController.move(center, 18);
     }
+
+    await getNearbySights();
   }
 
   List<Polyline<Object>> routeLines = [];
@@ -259,6 +266,8 @@ class _MapPageState extends State<MapPage> {
         padding: const EdgeInsets.all(70),
       ));
     }
+
+    await getNearbySights();
   }
 
   Future<void> getNearbySights() async {

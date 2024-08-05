@@ -15,6 +15,7 @@ import 'package:seymour_app/Views/draggable_menu.dart';
 import 'package:seymour_app/Views/save_page.dart';
 import 'package:seymour_app/Views/navigation_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:async';
 
 Journey currentJourney = Journey();
 
@@ -45,6 +46,8 @@ Future<LocationData?> currentLocation() async {
   return await location.getLocation();
 }
 
+bool settingsChanged = false;
+
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -55,6 +58,9 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   bool firstBuild = true;
   bool sightsChanged = false;
+
+  // Amount of time elapsed after changing settings to fetch sights
+  final Duration settingsDuration = const Duration(seconds: 3);
 
   TextEditingController topTextController = TextEditingController();
   TextEditingController bottomTextController = TextEditingController();
@@ -89,12 +95,24 @@ class _MapPageState extends State<MapPage> {
       _sideButtons.add(Card(
         child: IconButton(
           onPressed: () async {
-            currentJourney.route = await coordinatesToRoute(
+            if(bottomCoordinate != null) {
+              currentJourney.route = await coordinatesToRoute(
+                  currentJourney
+                      .sights()
+                      .map((Sight s) => s.getCoordinate())
+                      .toList()..insert(0, topCoordinate!)..add(bottomCoordinate!),
+                  _showBottomTextField);
+            }
+            // When it is a center point
+            else
+            {
+              currentJourney.route = await coordinatesToRoute(
                 currentJourney
                     .sights()
                     .map((Sight s) => s.getCoordinate())
                     .toList(),
                 _showBottomTextField);
+            }
 
             setState(() {
               routeLines = currentJourney.route!.drawRoute();
@@ -126,7 +144,7 @@ class _MapPageState extends State<MapPage> {
                   currentJourney
                       .sights()
                       .map((Sight s) => s.getCoordinate())
-                      .toList(),
+                      .toList()..insert(0, topCoordinate!)..add(bottomCoordinate!),
                   _showBottomTextField);
             }
             sightsChanged = false;
@@ -232,6 +250,8 @@ class _MapPageState extends State<MapPage> {
       topCoordinate = await getCoordinateFromAddress(topTextController.text);
       _mapController.move(center, 18);
     }
+
+    await getNearbySights();
   }
 
   List<Polyline<Object>> routeLines = [];
@@ -271,11 +291,11 @@ class _MapPageState extends State<MapPage> {
         padding: const EdgeInsets.all(70),
       ));
     }
+
+    await getNearbySights();
   }
 
   Future<void> getNearbySights() async {
-    // TODO: filter sights & store filtered list
-
     recommendedSights =
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
 
@@ -357,14 +377,23 @@ class _MapPageState extends State<MapPage> {
         recommendedToSelected: recommendedToSelected,
         selectedToRecommended: selectedToRecommended,
         recommendedSights: recommendedSights,
-        onRadiusChanged: (radiusMiles) {
+        getNearbySights: getNearbySights,
+        onRadiusChanged: (radiusMiles) async {
+          settingsChanged = true;
           setState(() {
             radiusInMiles = radiusMiles;
           });
-        },
-        backgroundChild: Stack(children: [
-          FutureBuilder<LocationData?>(
-              future: _currentLocation(),
+
+          Future.delayed(settingsDuration, () async {
+            if (settingsChanged) {
+              settingsChanged = false;
+              await getNearbySights();
+            }
+          });
+      },
+      backgroundChild: Stack(children: [
+        FutureBuilder<LocationData?>(
+            future: _currentLocation(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
                 if (firstBuild) {
                   if (snapchat.hasData) {

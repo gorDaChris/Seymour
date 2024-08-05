@@ -6,7 +6,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Models/journey.dart';
-
 import 'package:seymour_app/Common/Models/sight.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
@@ -54,6 +53,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   bool firstBuild = true;
+  // to recalculate route if navigation selected and route is not updated
   bool sightsChanged = false;
 
   TextEditingController topTextController = TextEditingController();
@@ -61,6 +61,7 @@ class _MapPageState extends State<MapPage> {
 
   late LatLng center;
 
+  // AKA starting point & destination
   Coordinate? topCoordinate;
   Coordinate? bottomCoordinate;
 
@@ -142,12 +143,14 @@ class _MapPageState extends State<MapPage> {
       ));
 
       _listKey.currentState?.insertItem(3);
-    } else {
+    } 
+    else {
       setState(() {
         _showSideButtonsButtonTurns = 0;
       });
 
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -160,7 +163,9 @@ class _MapPageState extends State<MapPage> {
           ),
         );
       });
+
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -175,6 +180,7 @@ class _MapPageState extends State<MapPage> {
       });
 
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -189,6 +195,7 @@ class _MapPageState extends State<MapPage> {
       });
 
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -266,8 +273,6 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> getNearbySights() async {
-    // TODO: filter sights & store filtered list
-
     recommendedSights =
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
 
@@ -276,7 +281,7 @@ class _MapPageState extends State<MapPage> {
       coordinates.addAll(leg.points);
     }
 
-    // Shorten list of coordinates for efficiency
+    // Abstract list of coordinates for performance
     coordinates = coordinates
         .asMap()
         .entries
@@ -432,8 +437,6 @@ class _MapPageState extends State<MapPage> {
                                                         const TextScaler.linear(
                                                             1.2)),
                                                 ElevatedButton(
-                                                    child: const Text(
-                                                        "Open in Wikipedia"),
                                                     onPressed:
                                                         sight.getWikipediaTitle() ==
                                                                 null
@@ -445,7 +448,9 @@ class _MapPageState extends State<MapPage> {
                                                                         "/wiki/${sight.getWikipediaTitle()}"),
                                                                     mode: LaunchMode
                                                                         .inAppBrowserView);
-                                                              })
+                                                              },
+                                                    child: const Text(
+                                                        "Open in Wikipedia"))
                                               ])),
                                       child: const Icon(
                                         Icons.location_pin,

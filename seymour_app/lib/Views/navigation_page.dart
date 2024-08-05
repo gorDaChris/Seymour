@@ -81,7 +81,6 @@ class _NavigationPageState extends State<NavigationPage> {
             currentJourney.route!.guidance.instructions[instructionIndex];
       });
       FlutterTts().speak(formatInstructionMessage(currentInstruction.message)!);
-      print(currentInstruction.maneuver);
     }
   }
 

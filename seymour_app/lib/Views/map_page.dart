@@ -6,7 +6,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Models/journey.dart';
-
 import 'package:seymour_app/Common/Models/sight.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
@@ -54,6 +53,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   bool firstBuild = true;
+  // to automatically recalculate route if navigation selected
   bool sightsChanged = false;
 
   TextEditingController topTextController = TextEditingController();
@@ -61,6 +61,7 @@ class _MapPageState extends State<MapPage> {
 
   late LatLng center;
 
+  // AKA starting point and destination
   Coordinate? topCoordinate;
   Coordinate? bottomCoordinate;
 
@@ -156,6 +157,7 @@ class _MapPageState extends State<MapPage> {
       });
 
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -168,7 +170,9 @@ class _MapPageState extends State<MapPage> {
           ),
         );
       });
+
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -183,6 +187,7 @@ class _MapPageState extends State<MapPage> {
       });
 
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -197,6 +202,7 @@ class _MapPageState extends State<MapPage> {
       });
 
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -279,13 +285,13 @@ class _MapPageState extends State<MapPage> {
     recommendedSights =
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
 
-    // Compile points along route and then getSights for each point
+    // compile points along route and then getSights for each point
     if (currentJourney.route != null) {
       for (var leg in currentJourney.route!.legs) {
         coordinates.addAll(leg.points);
       }
 
-      // Shorten list of coordinates for efficiency
+      // abstract list of coordinates for performance
       coordinates = coordinates
           .asMap()
           .entries
@@ -386,7 +392,8 @@ class _MapPageState extends State<MapPage> {
                           PolylineLayer(polylines: [...routeLines]),
                         ]);
                   }
-                } else {
+                } 
+                else {
                   return FlutterMap(
                       mapController: _mapController,
                       options: MapOptions(
@@ -457,8 +464,6 @@ class _MapPageState extends State<MapPage> {
                                                         const TextScaler.linear(
                                                             1.2)),
                                                 ElevatedButton(
-                                                    child: const Text(
-                                                        "Open in Wikipedia"),
                                                     onPressed:
                                                         sight.getWikipediaTitle() ==
                                                                 null
@@ -470,7 +475,9 @@ class _MapPageState extends State<MapPage> {
                                                                         "/wiki/${sight.getWikipediaTitle()}"),
                                                                     mode: LaunchMode
                                                                         .inAppBrowserView);
-                                                              })
+                                                              },
+                                                    child: const Text(
+                                                        "Open in Wikipedia"))
                                               ])),
                                       child: const Icon(
                                         Icons.location_pin,

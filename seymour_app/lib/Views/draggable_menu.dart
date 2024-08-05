@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:seymour_app/Common/Models/sight.dart';
 import 'package:seymour_app/Views/map_page.dart';
 import 'package:seymour_app/Views/survey_page.dart';
@@ -46,10 +45,9 @@ class _DraggableMenuState extends State<DraggableMenu> {
       borderRadius: br,
       panelSnapping: false,
       minHeight: 50,
-      // maxHeight: MediaQuery.of(context).size.height * 0.8,
       body: widget.backgroundChild,
 
-      //This ListView may have to be changed to ListView.builder when it eventually displays locations
+      // this ListView may have to be changed to ListView.builder when it eventually displays locations
       panel: Column(
         children: [
           SizedBox(

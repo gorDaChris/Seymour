@@ -29,7 +29,7 @@ class DraggableMenu extends StatefulWidget {
 }
 
 class _DraggableMenuState extends State<DraggableMenu> {
-  double radius = 0.5; //TODO: talk about whether we should use diameter instead
+  double radius = 0.5;
 
   void navigateToSurveyPage() {
     Navigator.of(context)
@@ -38,22 +38,28 @@ class _DraggableMenuState extends State<DraggableMenu> {
 
   @override
   Widget build(BuildContext context) {
+    BorderRadiusGeometry br = const BorderRadius.only(
+      topLeft: Radius.circular(15.0),
+      topRight: Radius.circular(15.0),
+    );
     return SlidingUpPanel(
+      borderRadius: br,
       panelSnapping: false,
-      minHeight: 20,
+      minHeight: 50,
       // maxHeight: MediaQuery.of(context).size.height * 0.8,
-      header: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: 20,
-        child: const Card(
-          color: Colors.grey,
-        ),
-      ),
       body: widget.backgroundChild,
 
       //This ListView may have to be changed to ListView.builder when it eventually displays locations
       panel: Column(
         children: [
+          SizedBox(
+            width: MediaQuery.of(context).size.width / 5,
+            height: 13,
+            child: const Card(
+              color: Colors.grey,
+            ),
+          ),
+          const Padding(padding: EdgeInsets.all(5)),
           ElevatedButton(
             child: const Text("Adjust Filters"),
             onPressed: () {
@@ -97,22 +103,25 @@ class _DraggableMenuState extends State<DraggableMenu> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                  Text("No nearby sights"),
-                ]))
+                      Text("No nearby sights"),
+                    ]
+                )
+            )
           ] else ...[
             Expanded(
                 child: ListView.builder(
-              itemCount: currentJourney.sights().length,
-              itemBuilder: (context, index) {
-                // TODO: clickable; they should be buttons
-                return ListTile(
-                  title: Text(currentJourney.sights()[index].name()),
-                  onTap: () {
-                    widget.selectedToRecommended(index);
-                  },
-                );
-              },
-            )),
+                itemCount: currentJourney.sights().length,
+                itemBuilder: (context, index) {
+                  // TODO: clickable; they should be buttons
+                  return ListTile(
+                    title: Text(currentJourney.sights()[index].name()),
+                    onTap: () {
+                      widget.selectedToRecommended(index);
+                    },
+                  );
+                },
+              )
+            ),
           ],
           const Divider(),
           const Text("Recommended Sights"),
@@ -122,22 +131,25 @@ class _DraggableMenuState extends State<DraggableMenu> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                  Text("No nearby sights"),
-                ]))
+                      Text("No nearby sights"),
+                    ]
+                )
+            )
           ] else ...[
             Expanded(
                 child: ListView.builder(
-              itemCount: widget.recommendedSights.length,
-              itemBuilder: (context, index) {
-                // TODO: clickable; they should be buttons
-                return ListTile(
-                  title: Text(widget.recommendedSights[index].name()),
-                  onTap: () {
-                    widget.recommendedToSelected(index);
-                  },
-                );
-              },
-            )),
+                itemCount: widget.recommendedSights.length,
+                itemBuilder: (context, index) {
+                  // TODO: clickable; they should be buttons
+                  return ListTile(
+                    title: Text(widget.recommendedSights[index].name()),
+                    onTap: () {
+                      widget.recommendedToSelected(index);
+                    },
+                  );
+                },
+              )
+            ),
           ],
         ],
       ),

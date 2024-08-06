@@ -32,10 +32,17 @@ class Sight {
 
   factory Sight.fromJson(Map<String, dynamic> json) {
     return Sight(
-      _name = json['name'],
-      _tourismType = json['tourismType'],
-      _coordinate = Coordinate.fromJsonAzure(json['coordinate']),
-      _wikipediaTitle = json['wikipediaTitle'],
+      json['name'],
+      Coordinate.fromJsonAzure(json['coordinate']),
+      json['tourismType'],
+      json['wikipediaTitle'],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'name': _name,
+    'tourismType': _tourismType,
+    'coordinate': _coordinate,
+    'wikipediaTitle': _wikipediaTitle,
+  };
 }

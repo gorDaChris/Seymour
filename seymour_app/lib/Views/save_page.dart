@@ -1,5 +1,8 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:seymour_app/Views/map_page.dart';
 
@@ -21,11 +24,47 @@ class SavePage extends StatefulWidget {
 }
 
 class _SavePageState extends State<SavePage> {
-  // TODO: list of Row Widgets
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
   List items = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _listJourneyFiles();
+  }
+
+  // TODO: list of row widgets
   final TextEditingController _textController = TextEditingController();
 
   // TODO: click row widget to expand options
+
+  // TODO: Verify that this is working
+  // TODO: System popup with load export delete
+  // TODO: Review the toJson code in other areas. Implement here as well
+  void _listJourneyFiles() async {
+    final path = await _localPath;
+    items = Directory("$path/journeys/").listSync();
+  }
+
+  // TODO: Check if file exists and introduct extra popup if true
+  void _saveJourney() async {
+    try {
+      final file = await _localFile;
+      String jsonStr = jsonEncode(currentJourney.toJson());
+      await file.writeAsString(jsonStr);
+    }
+    catch (e) {
+      print('Error saving journey: $e');
+    }
+  }
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/journeys/${_textController.text}.json');
+  }
 
   void _showInputDialog() {
     showDialog(
@@ -49,7 +88,8 @@ class _SavePageState extends State<SavePage> {
               child: const Text("Confirm"),
               onPressed: () {
                 setState(() {
-                  items.add(_textController.text);
+                  _saveJourney();
+                  _listJourneyFiles();
                 });
                 _textController.clear();
                 Navigator.of(context).pop();
@@ -59,16 +99,6 @@ class _SavePageState extends State<SavePage> {
         );
       },
     );
-  }
-
-  // TODO: Verify that this is working
-  // TODO: System popup with load export delete
-  // TODO: Review the toJson code in other areas. Implement here as well
-  void _listJourneyFiles() async {
-    directory = (await getApplicationDocumentsDirectory()).path;
-    setState(() {
-      items = io.Directory("$directory/journeys/").listSync();
-    });
   }
 
   @override

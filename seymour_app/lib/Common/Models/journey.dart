@@ -6,6 +6,9 @@ class Journey {
 
   final List<Sight> _currentSights = [];
 
+  Journey();
+  Journey.fromRoute(this.route);
+
   List<Sight> sights() {
     return List.unmodifiable(_currentSights);
   }
@@ -28,9 +31,7 @@ class Journey {
   }
 
   factory Journey.fromJson(Map<String, dynamic> json) {
-    Journey journey = Journey(
-      route: Route.fromJson(json['route']),
-    );
+    Journey journey = Journey.fromRoute(Route.fromJson(json['route']));
 
     journey.setSights((json['currentSights'] as List)
       .map((i) => Sight.fromJson(i))
@@ -38,4 +39,9 @@ class Journey {
 
     return journey;
   }
+
+  Map<String, dynamic> toJson() => {
+    'route': route,
+    'currentSights': _currentSights,
+  };
 }

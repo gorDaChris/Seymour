@@ -13,6 +13,11 @@ class Coordinate {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+    'latitude': latitude,
+    'longitude': longitude,
+  };
+
   @override
   String toString() {
     return "Latitude: $latitude, Longitude: $longitude";

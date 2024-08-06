@@ -34,6 +34,13 @@ class Route {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+    'summary': summary,
+    'legs': legs,
+    'sections': sections,
+    'guidance': guidance,
+  };
+
   List<Polyline<Object>> drawRoute() {
     List<Polyline<Object>> drawnRoads = [];
     for (Leg leg in legs) {
@@ -74,6 +81,15 @@ class Summary {
       arrivalTime: DateTime.parse(json['arrivalTime']),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'lengthInMeters': lengthInMeters,
+    'travelTimeInSeconds': travelTimeInSeconds,
+    'trafficDelayInSeconds': trafficDelayInSeconds,
+    'trafficLengthInMeters': trafficLengthInMeters,
+    'departureTime': departureTime,
+    'arrivalTime': arrivalTime,
+  };
 }
 
 class Leg {
@@ -90,6 +106,11 @@ class Leg {
           .toList(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'summary': summary,
+    'points': points,
+  };
 }
 
 class Section {
@@ -112,6 +133,13 @@ class Section {
       travelMode: json['travelMode'],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'startPointIndex': startPointIndex,
+    'endPointIndex': endPointIndex,
+    'sectionType': sectionType,
+    'travelMode': travelMode,
+  };
 }
 
 class Guidance {
@@ -130,6 +158,11 @@ class Guidance {
           .toList(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'instructions': instructions,
+    'instructionGroups': instructionGroups,
+  };
 }
 
 class Instruction {
@@ -177,6 +210,20 @@ class Instruction {
       junctionType: json['junctionType'],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'routeOffsetInMeters': routeOffsetInMeters,
+    'travelTimeInSeconds': travelTimeInSeconds,
+    'point': point,
+    'pointIndex': pointIndex,
+    'street': street,
+    'possibleCombineWithNext': possibleCombineWithNext,
+    'drivingSide': drivingSide,
+    'maneuver': maneuver,
+    'message': message,
+    'turnAngleInDecimalDegrees': turnAngleInDecimalDegrees,
+    'junctionType': junctionType,
+  };
 }
 
 class InstructionGroup {
@@ -199,4 +246,11 @@ class InstructionGroup {
       groupLengthInMeters: json['groupLengthInMeters'],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'firstInstructionIndex': firstInstructionIndex,
+    'lastInstructionIndex': lastInstructionIndex,
+    'groupMessage': groupMessage,
+    'groupLengthInMeters': groupLengthInMeters,
+  };
 }

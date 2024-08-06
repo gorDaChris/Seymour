@@ -35,10 +35,10 @@ class Route {
   }
 
   Map<String, dynamic> toJson() => {
-    'summary': summary,
+    'summary': summary.toJson(),
     'legs': legs,
     'sections': sections,
-    'guidance': guidance,
+    'guidance': guidance.toJson(),
   };
 
   List<Polyline<Object>> drawRoute() {
@@ -87,8 +87,8 @@ class Summary {
     'travelTimeInSeconds': travelTimeInSeconds,
     'trafficDelayInSeconds': trafficDelayInSeconds,
     'trafficLengthInMeters': trafficLengthInMeters,
-    'departureTime': departureTime,
-    'arrivalTime': arrivalTime,
+    'departureTime': departureTime.toString(),
+    'arrivalTime': arrivalTime.toString(),
   };
 }
 

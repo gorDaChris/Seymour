@@ -39,6 +39,7 @@ class _SavePageState extends State<SavePage> {
 
   // TODO: list of row widgets
   final TextEditingController _textController = TextEditingController();
+  String title = '';
 
   // TODO: click row widget to expand options
 
@@ -47,6 +48,10 @@ class _SavePageState extends State<SavePage> {
   // TODO: Review the toJson code in other areas. Implement here as well
   void _listJourneyFiles() async {
     final path = await _localPath;
+
+    if (!(await Directory("$path/journeys/").exists())) {
+      await Directory("$path/journeys/").create();
+    }
     items = Directory("$path/journeys/").listSync();
   }
 
@@ -56,6 +61,7 @@ class _SavePageState extends State<SavePage> {
       final file = await _localFile;
       String jsonStr = jsonEncode(currentJourney.toJson());
       await file.writeAsString(jsonStr);
+      print("Saved journey: $jsonStr");
     }
     catch (e) {
       print('Error saving journey: $e');
@@ -122,7 +128,7 @@ class _SavePageState extends State<SavePage> {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      title: Text(items[index]),
+                      title: Text(items[index].path),
                     );
                   },
                 ),

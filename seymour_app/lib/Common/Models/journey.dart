@@ -31,7 +31,14 @@ class Journey {
   }
 
   factory Journey.fromJson(Map<String, dynamic> json) {
-    Journey journey = Journey.fromRoute(Route.fromJson(json['route']));
+    Journey journey;
+
+    if (json['route'] != null) {
+      journey = Journey.fromRoute(Route.fromJson(json['route']));
+    }
+    else {
+      journey = Journey();
+    }
 
     journey.setSights((json['currentSights'] as List)
       .map((i) => Sight.fromJson(i))
@@ -41,7 +48,7 @@ class Journey {
   }
 
   Map<String, dynamic> toJson() => {
-    'route': route,
+    'route': route?.toJson(),
     'currentSights': _currentSights,
   };
 }

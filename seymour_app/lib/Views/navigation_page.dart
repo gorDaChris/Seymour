@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location/location.dart';
+
 import 'package:seymour_app/Common/Models/route.dart';
 import 'package:seymour_app/Common/Models/sight.dart';
 import 'package:seymour_app/Common/Queries/readWikipediaArticleAloud.dart';
@@ -46,12 +47,12 @@ class _NavigationPageState extends State<NavigationPage> {
   CircleMarker userLocationMarker =
       const CircleMarker(point: LatLng(0, 0), radius: 10);
 
-  void interpretLocation(LocationData data) {
+  void interpretLocation(Position data) {
     displayUserLocationCircle(data);
     changeCurrentInstructionIfNeeded(data);
   }
 
-  void displayUserLocationCircle(LocationData data) {
+  void displayUserLocationCircle(Position data) {
     setState(() {
       userLocationMarker = CircleMarker(
           point: LatLng(data.latitude!, data.longitude!),
@@ -62,7 +63,7 @@ class _NavigationPageState extends State<NavigationPage> {
     });
   }
 
-  void changeCurrentInstructionIfNeeded(LocationData data) {
+  void changeCurrentInstructionIfNeeded(Position data) {
     double userDistanceFromNextStepMeters = const Distance().as(
         LengthUnit.Meter,
         LatLng(data.latitude!, data.longitude!),
@@ -86,13 +87,17 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   String getNavigationInfo() {
-    int distance = currentJourney.route!.summary.lengthInMeters - currentJourney.route!.guidance.instructions[instructionIndex].routeOffsetInMeters;
-    int time = currentJourney.route!.summary.travelTimeInSeconds - currentJourney.route!.guidance.instructions[instructionIndex].travelTimeInSeconds;
+    int distance = currentJourney.route!.summary.lengthInMeters -
+        currentJourney
+            .route!.guidance.instructions[instructionIndex].routeOffsetInMeters;
+    int time = currentJourney.route!.summary.travelTimeInSeconds -
+        currentJourney
+            .route!.guidance.instructions[instructionIndex].travelTimeInSeconds;
 
     return "${distance}m   ${(time / 60).floor()}mins";
   }
 
-  late StreamSubscription<LocationData> locationStreamSubscription;
+  late StreamSubscription<Position> locationStreamSubscription;
 
   @override
   void initState() {
@@ -100,10 +105,10 @@ class _NavigationPageState extends State<NavigationPage> {
     //A route must exist before we get to this page
     routeLines = currentJourney.route!.drawRoute();
 
-    Location().changeSettings(interval: 2000);
+    // Location().changeSettings(interval: 2000);
 
     locationStreamSubscription =
-        Location().onLocationChanged.listen(interpretLocation);
+        Geolocator.getPositionStream().listen(interpretLocation);
   }
 
   List<Polyline<Object>> routeLines = [];
@@ -129,11 +134,11 @@ class _NavigationPageState extends State<NavigationPage> {
           isDraggable: false,
           panelSnapping: true,
           controller: _pc,
-          body: FutureBuilder<LocationData?>(
-              future: currentLocation(),
+          body: FutureBuilder<Position?>(
+              future: determinePosition(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
                 if (snapchat.hasData) {
-                  final LocationData currentLocation = snapchat.data;
+                  final Position currentLocation = snapchat.data;
                   return FlutterMap(
                       options: MapOptions(
                         initialCenter: currentJourney
@@ -154,66 +159,66 @@ class _NavigationPageState extends State<NavigationPage> {
                               .map((Sight sight) => Marker(
                                   point: sight.getCoordinate().toLatLng(),
                                   child: CustomPopup(
-                                      content: SizedBox(
-                                          width: 200,
-                                          height: 200,
-                                          child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              // mainAxisAlignment:
-                                              //     // MainAxisAlignment.spaceBetween,
-                                              children: <Widget>[
-                                                Text(sight.name(),
-                                                    textScaler:
-                                                        TextScaler.linear(1.2)),
-                                                ElevatedButton(
-                                                    onPressed:
-                                                        sight.getWikipediaTitle() ==
-                                                                null
-                                                            ? null
-                                                            : () async {
-                                                                await launchUrl(
-                                                                    Uri.https(
-                                                                        "en.wikipedia.org",
-                                                                        "/wiki/${sight.getWikipediaTitle()}"),
-                                                                    mode: LaunchMode
-                                                                        .inAppBrowserView);
-                                                              },
-                                                    child: const Text("Open in Wikipedia"),
-                                                ),
-                                                ElevatedButton(
-                                                    onPressed:
-                                                        sight.getWikipediaTitle() ==
-                                                                null
-                                                            ? null
-                                                            : () {
-                                                                readWikipediaArticleAloud(
-                                                                    sight
-                                                                        .getWikipediaTitle()!);
-                                                              },
-                                                    child: const Text(
-                                                        "Read wikipedia audio guide aloud"))
-                                              ])
-                                            ),
-                                        child: const Icon(
-                                          Icons.location_pin,
-                                          size: 30,
-                                          color: Colors.red,
-                                        ),
-                                      )
-                                    )
-                                  ).toList(),
+                                    content: SizedBox(
+                                        width: 200,
+                                        height: 200,
+                                        child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            // mainAxisAlignment:
+                                            //     // MainAxisAlignment.spaceBetween,
+                                            children: <Widget>[
+                                              Text(sight.name(),
+                                                  textScaler:
+                                                      TextScaler.linear(1.2)),
+                                              ElevatedButton(
+                                                onPressed:
+                                                    sight.getWikipediaTitle() ==
+                                                            null
+                                                        ? null
+                                                        : () async {
+                                                            await launchUrl(
+                                                                Uri.https(
+                                                                    "en.wikipedia.org",
+                                                                    "/wiki/${sight.getWikipediaTitle()}"),
+                                                                mode: LaunchMode
+                                                                    .inAppBrowserView);
+                                                          },
+                                                child: const Text(
+                                                    "Open in Wikipedia"),
+                                              ),
+                                              ElevatedButton(
+                                                  onPressed:
+                                                      sight.getWikipediaTitle() ==
+                                                              null
+                                                          ? null
+                                                          : () {
+                                                              readWikipediaArticleAloud(
+                                                                  sight
+                                                                      .getWikipediaTitle()!);
+                                                            },
+                                                  child: const Text(
+                                                      "Read wikipedia audio guide aloud"))
+                                            ])),
+                                    child: const Icon(
+                                      Icons.location_pin,
+                                      size: 30,
+                                      color: Colors.red,
+                                    ),
+                                  )))
+                              .toList(),
                         ),
                         MarkerLayer(
                           markers: [
                             Marker(
-                              point: currentJourney.route!.legs.last.points.last.toLatLng(),
-                              child: const Icon(
-                                Icons.flag_circle,
-                                size: 30,
-                                color: Colors.red,
-                              )
-                            ),
+                                point: currentJourney
+                                    .route!.legs.last.points.last
+                                    .toLatLng(),
+                                child: const Icon(
+                                  Icons.flag_circle,
+                                  size: 30,
+                                  color: Colors.red,
+                                )),
                           ],
                         ),
                       ]);
@@ -248,10 +253,17 @@ class _NavigationPageState extends State<NavigationPage> {
                               formatInstructionMessage(
                                       currentInstruction.street) ??
                                   "",
-                                  textScaler: TextScaler.linear(1.2)),
+                              textScaler: TextScaler.linear(1.2)),
+
+                          // Text("Example Dr.", textScaler: TextScaler.linear(1.5))
+                        ]),
+                    Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
                           Text(
+                              //TODO: put distance and time here
                               getNavigationInfo(),
-                              textScaler: const TextScaler.linear(1.2)),
+                              textScaler: TextScaler.linear(1.2)),
                         ]),
                     ElevatedButton(
                         child: const Text("Go back"),
@@ -259,8 +271,8 @@ class _NavigationPageState extends State<NavigationPage> {
                           navigateToMapPage();
                         })
                   ]))),
-      floatingActionButton:
-          ElevatedButton(onPressed: FlutterTts().stop, child: const Icon(Icons.stop)),
+      floatingActionButton: ElevatedButton(
+          onPressed: FlutterTts().stop, child: const Icon(Icons.stop)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
     );
   }

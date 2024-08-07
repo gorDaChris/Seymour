@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
+
 // ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -22,28 +23,45 @@ Journey currentJourney = Journey();
 const STARTING_MILES_RADIUS = 0.5;
 const METERS_IN_A_MILE = 1609.34;
 
-Future<LocationData?> currentLocation() async {
+/// Determine the current position of the device.
+///
+/// When the location services are not enabled or permissions
+/// are denied the `Future` will return an error.
+Future<Position> determinePosition() async {
   bool serviceEnabled;
-  PermissionStatus permissionGranted;
+  LocationPermission permission;
 
-  Location location = Location();
+  // Test if location services are enabled.
+  // serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  // if (!serviceEnabled) {
+  //   // Location services are not enabled don't continue
+  //   // accessing the position and request users of the
+  //   // App to enable the location services.
+  //   return Future.error('Location services are disabled.');
+  // }
 
-  serviceEnabled = await location.serviceEnabled();
-  if (!serviceEnabled) {
-    serviceEnabled = await location.requestService();
-    if (!serviceEnabled) {
-      return null;
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
     }
   }
 
-  permissionGranted = await location.hasPermission();
-  if (permissionGranted == PermissionStatus.denied) {
-    permissionGranted = await location.requestPermission();
-    if (permissionGranted != PermissionStatus.granted) {
-      return null;
-    }
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
   }
-  return await location.getLocation();
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
 }
 
 bool settingsChanged = false;
@@ -95,23 +113,24 @@ class _MapPageState extends State<MapPage> {
       _sideButtons.add(Card(
         child: IconButton(
           onPressed: () async {
-            if(bottomCoordinate != null) {
+            if (bottomCoordinate != null) {
               currentJourney.route = await coordinatesToRoute(
                   currentJourney
                       .sights()
                       .map((Sight s) => s.getCoordinate())
-                      .toList()..insert(0, topCoordinate!)..add(bottomCoordinate!),
+                      .toList()
+                    ..insert(0, topCoordinate!)
+                    ..add(bottomCoordinate!),
                   _showBottomTextField);
             }
             // When it is a center point
-            else
-            {
+            else {
               currentJourney.route = await coordinatesToRoute(
-                currentJourney
-                    .sights()
-                    .map((Sight s) => s.getCoordinate())
-                    .toList(),
-                _showBottomTextField);
+                  currentJourney
+                      .sights()
+                      .map((Sight s) => s.getCoordinate())
+                      .toList(),
+                  _showBottomTextField);
             }
 
             setState(() {
@@ -144,7 +163,9 @@ class _MapPageState extends State<MapPage> {
                   currentJourney
                       .sights()
                       .map((Sight s) => s.getCoordinate())
-                      .toList()..insert(0, topCoordinate!)..add(bottomCoordinate!),
+                      .toList()
+                    ..insert(0, topCoordinate!)
+                    ..add(bottomCoordinate!),
                   _showBottomTextField);
             }
             sightsChanged = false;
@@ -327,30 +348,6 @@ class _MapPageState extends State<MapPage> {
     setState(() {});
   }
 
-  Future<LocationData?> _currentLocation() async {
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-
-    Location location = Location();
-
-    serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return null;
-      }
-    }
-
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return null;
-      }
-    }
-    return await location.getLocation();
-  }
-
   double radiusInMiles = STARTING_MILES_RADIUS;
 
   List<Sight> recommendedSights = [];
@@ -383,21 +380,17 @@ class _MapPageState extends State<MapPage> {
           setState(() {
             radiusInMiles = radiusMiles;
           });
-
-          Future.delayed(settingsDuration, () async {
-            if (settingsChanged) {
-              settingsChanged = false;
-              await getNearbySights();
-            }
-          });
-      },
-      backgroundChild: Stack(children: [
-        FutureBuilder<LocationData?>(
-            future: _currentLocation(),
+        },
+        backgroundChild: Stack(children: [
+          FutureBuilder<Position>(
+              future: determinePosition(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
+                if (snapchat.hasError && snapchat.error != null) {
+                  return Text(snapchat.error!.toString());
+                }
                 if (firstBuild) {
                   if (snapchat.hasData) {
-                    final LocationData currentLocation = snapchat.data;
+                    final Position currentLocation = snapchat.data;
                     center = LatLng(
                         currentLocation.latitude!, currentLocation.longitude!);
                     firstBuild = false;
@@ -455,17 +448,18 @@ class _MapPageState extends State<MapPage> {
                                   ))
                               .toList(),
                         ),
-                        if (currentJourney.route != null) 
+                        if (currentJourney.route != null)
                           MarkerLayer(
                             markers: [
                               Marker(
-                                point: currentJourney.route!.legs.last.points.last.toLatLng(),
-                                child: const Icon(
-                                  Icons.flag_circle,
-                                  size: 30,
-                                  color: Colors.red,
-                                )
-                              ),
+                                  point: currentJourney
+                                      .route!.legs.last.points.last
+                                      .toLatLng(),
+                                  child: const Icon(
+                                    Icons.flag_circle,
+                                    size: 30,
+                                    color: Colors.red,
+                                  )),
                             ],
                           ),
                         MarkerLayer(

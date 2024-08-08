@@ -400,8 +400,8 @@ class _MapPageState extends State<MapPage> {
           });
         },
         backgroundChild: Stack(children: [
-          FutureBuilder<LocationData?>(
-              future: _currentLocation(),
+          FutureBuilder<Position?>(
+              future: determinePosition(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
                 if (snapchat.hasError && snapchat.error != null) {
                   return Text(snapchat.error!.toString());

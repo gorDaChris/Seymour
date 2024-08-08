@@ -113,7 +113,7 @@ class _SavePageState extends State<SavePage> {
                                 textScaler: TextScaler.linear(1.5),
                               ),
                               trailing: SizedBox(
-                                width: 100,
+                                width: 150,
                                 child: Row(
                                   children: [
                                     ElevatedButton(
@@ -123,7 +123,13 @@ class _SavePageState extends State<SavePage> {
                                                   .readAsStringSync()));
                                           Navigator.of(context).pop();
                                         },
-                                        child: Icon(Icons.file_open))
+                                        child: Icon(Icons.file_open)),
+                                    ElevatedButton(
+                                        onPressed: () {
+                                          snapshot.data![index].deleteSync();
+                                          setState(() {});
+                                        },
+                                        child: Icon(Icons.delete))
                                   ],
                                 ),
                               ),

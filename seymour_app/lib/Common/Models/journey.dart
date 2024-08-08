@@ -8,6 +8,7 @@ class Journey {
   final List<Sight> _currentSights = [];
 
   Coordinate? mapCenter;
+  double? mapZoom;
 
   List<Sight> sights() {
     return List.unmodifiable(_currentSights);
@@ -47,12 +48,15 @@ class Journey {
 
     journey.mapCenter = Coordinate.fromJsonAzure(json["mapCenter"]);
 
+    journey.mapZoom = double.parse(json["mapZoom"]);
+
     return journey;
   }
 
   Map<String, dynamic> toJson() => {
         'route': route?.toJson(),
         'currentSights': _currentSights,
-        "mapCenter": mapCenter?.toJson()
+        "mapCenter": mapCenter?.toJson(),
+        "mapZoom": mapZoom.toString()
       };
 }

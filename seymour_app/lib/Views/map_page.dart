@@ -77,12 +77,14 @@ class _MapPageState extends State<MapPage> {
 
   void navigateToImportExportSavePage() {
     currentJourney.mapCenter = _mapController.camera.center.toCoordinate();
+    currentJourney.mapZoom = _mapController.camera.zoom;
 
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (context) => const SavePage()))
         .then((value) => {
               setState(() {
-                _mapController.move(currentJourney.mapCenter!.toLatLng(), 15);
+                _mapController.move(currentJourney.mapCenter!.toLatLng(),
+                    currentJourney.mapZoom!);
               })
             });
   }

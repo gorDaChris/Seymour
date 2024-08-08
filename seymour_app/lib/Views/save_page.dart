@@ -40,6 +40,11 @@ class _SavePageState extends State<SavePage> {
 
   Future<List<File>> get _localJourneyFiles async {
     final path = await _localPath;
+
+    if (!Directory('$path/journeys/').existsSync()) {
+      Directory('$path/journeys/').create(recursive: true);
+    }
+
     return Directory('$path/journeys/').listSync().whereType<File>().toList();
   }
 

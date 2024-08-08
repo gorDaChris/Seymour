@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -128,7 +129,9 @@ class _SavePageState extends State<SavePage> {
                                         child: Icon(Icons.file_open)),
                                     ElevatedButton(
                                         onPressed: () async {
-                                          await Share.shareXFiles([XFile(snapshot.data![index].path)]);
+                                          await Share.shareXFiles([
+                                            XFile(snapshot.data![index].path)
+                                          ]);
                                         },
                                         child: Icon(Icons.ios_share)),
                                     ElevatedButton(
@@ -180,7 +183,21 @@ class _SavePageState extends State<SavePage> {
                       style: ElevatedButton.styleFrom(
                           shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.zero)),
-                      onPressed: () {},
+                      onPressed: () async {
+                        FilePickerResult? result =
+                            await FilePicker.platform.pickFiles();
+
+                        if (result != null) {
+                          File file = File(result.files.single.path!);
+                          String path = await _localPath;
+                          file.copySync(
+                              "$path/journeys/${file.path.split("/").last}");
+
+                          setState(() {});
+                        } else {
+                          // User canceled the picker
+                        }
+                      },
                       child: const Text("IMPORT"),
                     ),
                   ),

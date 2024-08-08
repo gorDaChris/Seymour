@@ -221,6 +221,7 @@ class Instruction {
         'message': message,
         'turnAngleInDecimalDegrees': turnAngleInDecimalDegrees,
         'junctionType': junctionType,
+        "instructionType": instructionType
       };
 }
 

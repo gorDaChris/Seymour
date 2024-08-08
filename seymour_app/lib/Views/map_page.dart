@@ -76,8 +76,15 @@ class _MapPageState extends State<MapPage> {
   static final MapController _mapController = MapController();
 
   void navigateToImportExportSavePage() {
+    currentJourney.mapCenter = center.toCoordinate();
+
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const SavePage()));
+        .push(MaterialPageRoute(builder: (context) => const SavePage()))
+        .then((value) => {
+              setState(() {
+                _mapController.move(currentJourney.mapCenter!.toLatLng(), 17);
+              })
+            });
   }
 
   void navigateToNavigationPage() {
@@ -95,23 +102,24 @@ class _MapPageState extends State<MapPage> {
       _sideButtons.add(Card(
         child: IconButton(
           onPressed: () async {
-            if(bottomCoordinate != null) {
+            if (bottomCoordinate != null) {
               currentJourney.route = await coordinatesToRoute(
                   currentJourney
                       .sights()
                       .map((Sight s) => s.getCoordinate())
-                      .toList()..insert(0, topCoordinate!)..add(bottomCoordinate!),
+                      .toList()
+                    ..insert(0, topCoordinate!)
+                    ..add(bottomCoordinate!),
                   _showBottomTextField);
             }
             // When it is a center point
-            else
-            {
+            else {
               currentJourney.route = await coordinatesToRoute(
-                currentJourney
-                    .sights()
-                    .map((Sight s) => s.getCoordinate())
-                    .toList(),
-                _showBottomTextField);
+                  currentJourney
+                      .sights()
+                      .map((Sight s) => s.getCoordinate())
+                      .toList(),
+                  _showBottomTextField);
             }
 
             setState(() {
@@ -144,7 +152,9 @@ class _MapPageState extends State<MapPage> {
                   currentJourney
                       .sights()
                       .map((Sight s) => s.getCoordinate())
-                      .toList()..insert(0, topCoordinate!)..add(bottomCoordinate!),
+                      .toList()
+                    ..insert(0, topCoordinate!)
+                    ..add(bottomCoordinate!),
                   _showBottomTextField);
             }
             sightsChanged = false;
@@ -300,7 +310,7 @@ class _MapPageState extends State<MapPage> {
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
 
     // Compile points along route and then getSights for each point
-    if (currentJourney.route != null) {
+    if (currentJourney.route != null && _showBottomTextField) {
       for (var leg in currentJourney.route!.legs) {
         coordinates.addAll(leg.points);
       }
@@ -312,6 +322,8 @@ class _MapPageState extends State<MapPage> {
           .where((entry) => (entry.key + 1) % 10 == 0)
           .map((entry) => entry.value)
           .toList();
+    } else {
+      coordinates = [];
     }
     List<Future<List<Sight>>> predetSightFutures = coordinates
         .map((coordinate) =>
@@ -390,10 +402,10 @@ class _MapPageState extends State<MapPage> {
               await getNearbySights();
             }
           });
-      },
-      backgroundChild: Stack(children: [
-        FutureBuilder<LocationData?>(
-            future: _currentLocation(),
+        },
+        backgroundChild: Stack(children: [
+          FutureBuilder<LocationData?>(
+              future: _currentLocation(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
                 if (firstBuild) {
                   if (snapchat.hasData) {
@@ -455,17 +467,18 @@ class _MapPageState extends State<MapPage> {
                                   ))
                               .toList(),
                         ),
-                        if (currentJourney.route != null) 
+                        if (currentJourney.route != null)
                           MarkerLayer(
                             markers: [
                               Marker(
-                                point: currentJourney.route!.legs.last.points.last.toLatLng(),
-                                child: const Icon(
-                                  Icons.flag_circle,
-                                  size: 30,
-                                  color: Colors.red,
-                                )
-                              ),
+                                  point: currentJourney
+                                      .route!.legs.last.points.last
+                                      .toLatLng(),
+                                  child: const Icon(
+                                    Icons.flag_circle,
+                                    size: 30,
+                                    color: Colors.red,
+                                  )),
                             ],
                           ),
                         MarkerLayer(

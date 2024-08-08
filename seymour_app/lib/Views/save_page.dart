@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:seymour_app/Common/Models/journey.dart';
 import 'package:seymour_app/Common/Queries/get_filters.dart';
 import 'package:seymour_app/Views/map_page.dart';
 
@@ -104,10 +105,29 @@ class _SavePageState extends State<SavePage> {
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             return ListTile(
-                                title: Text(snapshot.data![index].path
+                              leading: Text(
+                                snapshot.data![index].path
                                     .split("/")
                                     .last
-                                    .replaceFirst(".json", "")));
+                                    .replaceFirst(".json", ""),
+                                textScaler: TextScaler.linear(1.5),
+                              ),
+                              trailing: SizedBox(
+                                width: 100,
+                                child: Row(
+                                  children: [
+                                    ElevatedButton(
+                                        onPressed: () async {
+                                          currentJourney = Journey.fromJson(
+                                              jsonDecode(snapshot.data![index]
+                                                  .readAsStringSync()));
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Icon(Icons.file_open))
+                                  ],
+                                ),
+                              ),
+                            );
                           },
                         ),
                       ),

@@ -1,3 +1,4 @@
+import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Models/route.dart';
 import 'package:seymour_app/Common/Models/sight.dart';
 
@@ -5,6 +6,8 @@ class Journey {
   Route? route;
 
   final List<Sight> _currentSights = [];
+
+  Coordinate? mapCenter;
 
   List<Sight> sights() {
     return List.unmodifiable(_currentSights);
@@ -42,11 +45,14 @@ class Journey {
     journey.setSights(
         (json['currentSights'] as List).map((i) => Sight.fromJson(i)).toList());
 
+    journey.mapCenter = Coordinate.fromJsonAzure(json["mapCenter"]);
+
     return journey;
   }
 
   Map<String, dynamic> toJson() => {
         'route': route?.toJson(),
         'currentSights': _currentSights,
+        "mapCenter": mapCenter?.toJson()
       };
 }

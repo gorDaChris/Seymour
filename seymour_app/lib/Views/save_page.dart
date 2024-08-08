@@ -3,17 +3,19 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
 import 'package:seymour_app/Common/Models/journey.dart';
 import 'package:seymour_app/Common/Queries/get_filters.dart';
 import 'package:seymour_app/Views/map_page.dart';
 
 /*
- * The generic layout of this page was generated with the assistance of GPT-4 and has since been modified. 
- * 
+ * The generic layout of this page was generated with the assistance of GPT-4 and has since been modified.
+ *
  * The following prompt was used:
- * "I am designing a page to save items using flutter. I want a button at the bottom left to "save" 
- * placeholder items, so that when it is clicked, a keyboard will appear and after selecting confirm, 
- * a new row with the entered name will appear. There will also be a button on the bottom right, that 
+ * "I am designing a page to save items using flutter. I want a button at the bottom left to "save"
+ * placeholder items, so that when it is clicked, a keyboard will appear and after selecting confirm,
+ * a new row with the entered name will appear. There will also be a button on the bottom right, that
  * does not have to do anything at the moment. Can you generate a dart file that will get me this page?"
  */
 
@@ -113,7 +115,7 @@ class _SavePageState extends State<SavePage> {
                                 textScaler: TextScaler.linear(1.5),
                               ),
                               trailing: SizedBox(
-                                width: 150,
+                                width: 225,
                                 child: Row(
                                   children: [
                                     ElevatedButton(
@@ -125,11 +127,16 @@ class _SavePageState extends State<SavePage> {
                                         },
                                         child: Icon(Icons.file_open)),
                                     ElevatedButton(
+                                        onPressed: () async {
+                                          await Share.shareXFiles([XFile(snapshot.data![index].path)]);
+                                        },
+                                        child: Icon(Icons.ios_share)),
+                                    ElevatedButton(
                                         onPressed: () {
                                           snapshot.data![index].deleteSync();
                                           setState(() {});
                                         },
-                                        child: Icon(Icons.delete))
+                                        child: Icon(Icons.delete)),
                                   ],
                                 ),
                               ),

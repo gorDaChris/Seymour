@@ -24,6 +24,14 @@ class Route {
       required this.sections,
       required this.guidance});
 
+  Map<String, dynamic> toJson() => {
+    'summary': summary.toJson(),
+    'legs': legs,
+    'sections': sections,
+    'guidance': guidance.toJson(),
+  };
+
+
   factory Route.fromJson(Map<String, dynamic> json) {
     return Route(
       summary: Summary.fromJson(json['summary']),
@@ -74,6 +82,17 @@ class Summary {
       arrivalTime: DateTime.parse(json['arrivalTime']),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'lengthInMeters': lengthInMeters,
+    'travelTimeInSeconds': travelTimeInSeconds,
+    'trafficDelayInSeconds': trafficDelayInSeconds,
+    'trafficLengthInMeters': trafficLengthInMeters,
+    'departureTime': departureTime,
+    'arrivalTime': arrivalTime,
+    'departureTime': departureTime.toString(),
+    'arrivalTime': arrivalTime.toString(),
+  };
 }
 
 class Leg {

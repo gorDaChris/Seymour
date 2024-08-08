@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:seymour_app/Views/map_page.dart';
 
 /*
  * The generic layout of this page was generated with the assistance of GPT-4 and has since been modified. 
@@ -21,8 +26,42 @@ class _SavePageState extends State<SavePage> {
   // TODO: list of Row Widgets
   List<String> items = [];
   final TextEditingController _textController = TextEditingController();
+  String title = '';
 
   // TODO: click row widget to expand options
+/*
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File("$path/journey.json");
+  }
+
+  Future<File> writeJourneyToFile() async {
+    final file = await _localFile;
+    String data = jsonEncode(currentJourney);
+    return file.writeAsString(data);
+
+  }
+
+  Future<List<FileSystemEntity>> listFiles() {
+    final path = await _localPath;
+    final directory = Directory(path);
+    return directory.listSync();
+  }
+*/
+
+  void _listJourneyFiles() async {
+    final path = await _localPath;
+
+    if (!(await Directory("$path/journeys/").exists())) {
+      await Directory("$path/journeys/").create();
+    }
+    items = Directory("$path/journeys/").listSync();
+  }
 
   void _showInputDialog() {
     showDialog(
@@ -56,6 +95,13 @@ class _SavePageState extends State<SavePage> {
         );
       },
     );
+    /*
+    writeJourneyToFile();
+    List<FileSystemEntity> files = listFiles();
+    files.forEach((file) {
+      print(file.path);
+    });
+    */
   }
 
   @override

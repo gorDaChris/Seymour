@@ -28,4 +28,11 @@ class Sight {
   String? getWikipediaTitle() {
     return _wikipediaTitle;
   }
+
+  Map<String, dynamic> toJson() {
+    final data = <String, dynamic>{};
+    data['name'] = _name;
+
+    return data;
+  }
 }

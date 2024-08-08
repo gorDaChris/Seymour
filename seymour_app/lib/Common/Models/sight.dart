@@ -11,7 +11,8 @@ class Sight {
 
   final String? _wikipediaTitle;
 
-  Sight(this._name, this._coordinate, this._tourismType, this._artworkType, this._wikipediaTitle);
+  Sight(this._name, this._coordinate, this._tourismType, this._artworkType,
+      this._wikipediaTitle);
 
   @override
   String toString() {
@@ -33,4 +34,22 @@ class Sight {
   bool isArtwork() {
     return _artworkType != null;
   }
+
+  factory Sight.fromJson(Map<String, dynamic> json) {
+    return Sight(
+      json['name'],
+      Coordinate.fromJsonAzure(json['coordinate']),
+      json['tourismType'],
+      json["artworkType"],
+      json['wikipediaTitle'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': _name,
+        'tourismType': _tourismType,
+        'coordinate': _coordinate,
+        'wikipediaTitle': _wikipediaTitle,
+        "artworkType": _artworkType
+      };
 }

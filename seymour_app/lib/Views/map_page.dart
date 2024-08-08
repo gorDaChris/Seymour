@@ -168,14 +168,23 @@ class _MapPageState extends State<MapPage> {
           onPressed: () async {
             getNearbySights();
             if (sightsChanged) {
-              currentJourney.route = await coordinatesToRoute(
-                  currentJourney
-                      .sights()
-                      .map((Sight s) => s.getCoordinate())
-                      .toList()
-                    ..insert(0, topCoordinate!)
-                    ..add(bottomCoordinate!),
-                  _showBottomTextField);
+              if (_showBottomTextField) {
+                currentJourney.route = await coordinatesToRoute(
+                    currentJourney
+                        .sights()
+                        .map((Sight s) => s.getCoordinate())
+                        .toList()
+                      ..insert(0, topCoordinate!)
+                      ..add(bottomCoordinate!),
+                    _showBottomTextField);
+              } else {
+                currentJourney.route = await coordinatesToRoute(
+                    currentJourney
+                        .sights()
+                        .map((Sight s) => s.getCoordinate())
+                        .toList(),
+                    _showBottomTextField);
+              }
             }
             sightsChanged = false;
             navigateToNavigationPage();

@@ -94,8 +94,17 @@ class _MapPageState extends State<MapPage> {
   static final MapController _mapController = MapController();
 
   void navigateToImportExportSavePage() {
+    currentJourney.mapCenter = _mapController.camera.center.toCoordinate();
+    currentJourney.mapZoom = _mapController.camera.zoom;
+
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const SavePage()));
+        .push(MaterialPageRoute(builder: (context) => const SavePage()))
+        .then((value) => {
+              setState(() {
+                _mapController.move(currentJourney.mapCenter!.toLatLng(),
+                    currentJourney.mapZoom!);
+              })
+            });
   }
 
   void navigateToNavigationPage() {
@@ -321,7 +330,7 @@ class _MapPageState extends State<MapPage> {
         await getSights(center, radiusInMiles * METERS_IN_A_MILE);
 
     // Compile points along route and then getSights for each point
-    if (currentJourney.route != null) {
+    if (currentJourney.route != null && _showBottomTextField) {
       for (var leg in currentJourney.route!.legs) {
         coordinates.addAll(leg.points);
       }
@@ -333,6 +342,8 @@ class _MapPageState extends State<MapPage> {
           .where((entry) => (entry.key + 1) % 10 == 0)
           .map((entry) => entry.value)
           .toList();
+    } else {
+      coordinates = [];
     }
     List<Future<List<Sight>>> predetSightFutures = coordinates
         .map((coordinate) =>
@@ -380,10 +391,17 @@ class _MapPageState extends State<MapPage> {
           setState(() {
             radiusInMiles = radiusMiles;
           });
+
+          Future.delayed(settingsDuration, () async {
+            if (settingsChanged) {
+              settingsChanged = false;
+              await getNearbySights();
+            }
+          });
         },
         backgroundChild: Stack(children: [
-          FutureBuilder<Position>(
-              future: determinePosition(),
+          FutureBuilder<LocationData?>(
+              future: _currentLocation(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
                 if (snapchat.hasError && snapchat.error != null) {
                   return Text(snapchat.error!.toString());

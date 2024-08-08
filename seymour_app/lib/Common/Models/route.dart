@@ -46,6 +46,13 @@ class Route {
 
     return drawnRoads;
   }
+
+  Map<String, dynamic> toJson() => {
+        'summary': summary.toJson(),
+        'legs': legs,
+        'sections': sections,
+        'guidance': guidance.toJson(),
+      };
 }
 
 class Summary {
@@ -74,6 +81,15 @@ class Summary {
       arrivalTime: DateTime.parse(json['arrivalTime']),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'lengthInMeters': lengthInMeters,
+        'travelTimeInSeconds': travelTimeInSeconds,
+        'trafficDelayInSeconds': trafficDelayInSeconds,
+        'trafficLengthInMeters': trafficLengthInMeters,
+        'departureTime': departureTime.toString(),
+        'arrivalTime': arrivalTime.toString(),
+      };
 }
 
 class Leg {
@@ -90,6 +106,11 @@ class Leg {
           .toList(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'summary': summary,
+        'points': points,
+      };
 }
 
 class Section {
@@ -112,6 +133,12 @@ class Section {
       travelMode: json['travelMode'],
     );
   }
+  Map<String, dynamic> toJson() => {
+        'startPointIndex': startPointIndex,
+        'endPointIndex': endPointIndex,
+        'sectionType': sectionType,
+        'travelMode': travelMode,
+      };
 }
 
 class Guidance {
@@ -130,6 +157,10 @@ class Guidance {
           .toList(),
     );
   }
+  Map<String, dynamic> toJson() => {
+        'instructions': instructions,
+        'instructionGroups': instructionGroups,
+      };
 }
 
 class Instruction {
@@ -177,6 +208,21 @@ class Instruction {
       junctionType: json['junctionType'],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'routeOffsetInMeters': routeOffsetInMeters,
+        'travelTimeInSeconds': travelTimeInSeconds,
+        'point': point,
+        'pointIndex': pointIndex,
+        'street': street,
+        'possibleCombineWithNext': possibleCombineWithNext,
+        'drivingSide': drivingSide,
+        'maneuver': maneuver,
+        'message': message,
+        'turnAngleInDecimalDegrees': turnAngleInDecimalDegrees,
+        'junctionType': junctionType,
+        "instructionType": instructionType
+      };
 }
 
 class InstructionGroup {
@@ -199,4 +245,11 @@ class InstructionGroup {
       groupLengthInMeters: json['groupLengthInMeters'],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'firstInstructionIndex': firstInstructionIndex,
+        'lastInstructionIndex': lastInstructionIndex,
+        'groupMessage': groupMessage,
+        'groupLengthInMeters': groupLengthInMeters,
+      };
 }

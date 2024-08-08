@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -71,10 +72,14 @@ class _SavePageState extends State<SavePage> {
             TextButton(
               child: const Text("Confirm"),
               onPressed: () async {
-                String path = await _localPath;
-                File("$path/journeys/${_textController.text}.json")
-                    .writeAsString(jsonEncode(currentJourney.toJson()));
-
+                //Check if we are in web mode, if so export
+                if (!kIsWeb) {
+                  String path = await _localPath;
+                  File("$path/journeys/${_textController.text}.json")
+                      .writeAsString(jsonEncode(currentJourney.toJson()));
+                } else {
+                  Share.share(jsonEncode(currentJourney.toJson()));
+                }
                 setState(() {
                   // items.add(_textController.text);
                 });
@@ -193,12 +198,19 @@ class _SavePageState extends State<SavePage> {
                             await FilePicker.platform.pickFiles();
 
                         if (result != null) {
-                          File file = File(result.files.single.path!);
-                          String path = await _localPath;
-                          file.copySync(
-                              "$path/journeys/${file.path.split("/").last}");
+                          if (!kIsWeb) {
+                            File file = File(result.files.single.path!);
+                            String path = await _localPath;
+                            file.copySync(
+                                "$path/journeys/${file.path.split("/").last}");
 
-                          setState(() {});
+                            setState(() {});
+                          } else {
+                            currentJourney = Journey.fromJson(jsonDecode(
+                                Utf8Decoder().convert(
+                                    result.files.single.bytes!.toList())));
+                            Navigator.of(context).pop();
+                          }
                         } else {
                           // User canceled the picker
                         }

@@ -26,4 +26,27 @@ class Journey {
   Sight removeSight(int index) {
     return _currentSights.removeAt(index);
   }
+
+  Journey();
+  Journey.fromRoute(this.route);
+
+  factory Journey.fromJson(Map<String, dynamic> json) {
+    Journey journey;
+
+    if (json['route'] != null) {
+      journey = Journey.fromRoute(Route.fromJson(json['route']));
+    } else {
+      journey = Journey();
+    }
+
+    journey.setSights(
+        (json['currentSights'] as List).map((i) => Sight.fromJson(i)).toList());
+
+    return journey;
+  }
+
+  Map<String, dynamic> toJson() => {
+        'route': route?.toJson(),
+        'currentSights': _currentSights,
+      };
 }

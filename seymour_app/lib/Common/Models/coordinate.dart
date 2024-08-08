@@ -21,6 +21,11 @@ class Coordinate {
   LatLng toLatLng() {
     return LatLng(latitude, longitude);
   }
+
+  Map<String, dynamic> toJson() => {
+        'latitude': latitude,
+        'longitude': longitude,
+      };
 }
 
 extension ToCoord on LatLng {

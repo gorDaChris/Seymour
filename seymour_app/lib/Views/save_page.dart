@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:seymour_app/Common/Queries/get_filters.dart';
+import 'package:seymour_app/Views/map_page.dart';
 
 /*
  * The generic layout of this page was generated with the assistance of GPT-4 and has since been modified. 
@@ -19,8 +25,19 @@ class SavePage extends StatefulWidget {
 
 class _SavePageState extends State<SavePage> {
   // TODO: list of Row Widgets
-  List<String> items = [];
+  List<File> items = [];
   final TextEditingController _textController = TextEditingController();
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  Future<List<File>> get _localJourneyFiles async {
+    final path = await _localPath;
+    return Directory('$path/journeys/').listSync().whereType<File>().toList();
+  }
 
   // TODO: click row widget to expand options
 
@@ -44,9 +61,13 @@ class _SavePageState extends State<SavePage> {
             ),
             TextButton(
               child: const Text("Confirm"),
-              onPressed: () {
+              onPressed: () async {
+                String path = await _localPath;
+                File("$path/journeys/${_textController.text}.json")
+                    .writeAsString(jsonEncode(currentJourney.toJson()));
+
                 setState(() {
-                  items.add(_textController.text);
+                  // items.add(_textController.text);
                 });
                 _textController.clear();
                 Navigator.of(context).pop();
@@ -62,31 +83,43 @@ class _SavePageState extends State<SavePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(),
-        body: Column(
-          children: [
-            if (items.isEmpty) ...[
-              // TODO completely center text
-              const Center(
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                    Text("Looks like you haven't saved anything yet."),
-                  ]))
-            ] else ...[
-              Expanded(
-                child: ListView.builder(
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(items[index]),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ],
-        ),
+        body: FutureBuilder<List<File>>(
+            future: _localJourneyFiles,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Column(
+                  children: [
+                    if (snapshot.data!.isEmpty) ...[
+                      // TODO completely center text
+                      const Center(
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                            Text("Looks like you haven't saved anything yet."),
+                          ]))
+                    ] else ...[
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                                title: Text(snapshot.data![index].path
+                                    .split("/")
+                                    .last
+                                    .replaceFirst(".json", "")));
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            }),
         bottomNavigationBar: BottomAppBar(
           child: SizedBox(
             height: 50,

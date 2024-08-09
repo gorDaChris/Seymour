@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:seymour_app/Common/Models/route.dart';
@@ -81,10 +80,11 @@ class _NavigationPageState extends State<NavigationPage> {
             currentJourney.route!.guidance.instructions[instructionIndex];
       });
       FlutterTts().speak(formatInstructionMessage(currentInstruction.message)!);
-      print(currentInstruction.maneuver);
+      //print(currentInstruction.maneuver);
     }
   }
 
+  // This is displayed beneath "next turn" on bottom of page
   String getNavigationInfo() {
     int distance = currentJourney.route!.summary.lengthInMeters - currentJourney.route!.guidance.instructions[instructionIndex].routeOffsetInMeters;
     int time = currentJourney.route!.summary.travelTimeInSeconds - currentJourney.route!.guidance.instructions[instructionIndex].travelTimeInSeconds;
@@ -133,7 +133,7 @@ class _NavigationPageState extends State<NavigationPage> {
               future: currentLocation(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapchat) {
                 if (snapchat.hasData) {
-                  final LocationData currentLocation = snapchat.data;
+                  //final LocationData currentLocation = snapchat.data;
                   return FlutterMap(
                       options: MapOptions(
                         initialCenter: currentJourney
@@ -165,7 +165,7 @@ class _NavigationPageState extends State<NavigationPage> {
                                               children: <Widget>[
                                                 Text(sight.name(),
                                                     textScaler:
-                                                        TextScaler.linear(1.2)),
+                                                        const TextScaler.linear(1.2)),
                                                 ElevatedButton(
                                                     onPressed:
                                                         sight.getWikipediaTitle() ==
@@ -248,7 +248,7 @@ class _NavigationPageState extends State<NavigationPage> {
                               formatInstructionMessage(
                                       currentInstruction.street) ??
                                   "",
-                                  textScaler: TextScaler.linear(1.2)),
+                                  textScaler: const TextScaler.linear(1.2)),
                           Text(
                               getNavigationInfo(),
                               textScaler: const TextScaler.linear(1.2)),

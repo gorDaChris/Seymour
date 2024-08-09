@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
-// ignore: depend_on_referenced_packages
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:seymour_app/Common/Models/coordinate.dart';
 import 'package:seymour_app/Common/Models/journey.dart';
-
 import 'package:seymour_app/Common/Models/sight.dart';
 import 'package:seymour_app/Common/Queries/address_to_coordinates.dart';
 import 'package:seymour_app/Common/Queries/coordinates_to_route.dart';
@@ -35,7 +33,6 @@ Future<LocationData?> currentLocation() async {
       return null;
     }
   }
-
   permissionGranted = await location.hasPermission();
   if (permissionGranted == PermissionStatus.denied) {
     permissionGranted = await location.requestPermission();
@@ -57,6 +54,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   bool firstBuild = true;
+  // Route to automatically update when navigation selected
   bool sightsChanged = false;
 
   // Amount of time elapsed after changing settings to fetch sights
@@ -67,6 +65,7 @@ class _MapPageState extends State<MapPage> {
 
   late LatLng center;
 
+  // AKA starting point and destination
   Coordinate? topCoordinate;
   Coordinate? bottomCoordinate;
 
@@ -94,6 +93,7 @@ class _MapPageState extends State<MapPage> {
         .push(MaterialPageRoute(builder: (context) => const NavigationPage()));
   }
 
+// Redirects user to respective functions on side button press
   void _handleShowSideButtons() {
     _showAllSideButtons = !_showAllSideButtons;
     if (_showAllSideButtons) {
@@ -186,6 +186,7 @@ class _MapPageState extends State<MapPage> {
       });
 
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -198,7 +199,9 @@ class _MapPageState extends State<MapPage> {
           ),
         );
       });
+
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -213,6 +216,7 @@ class _MapPageState extends State<MapPage> {
       });
 
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -227,6 +231,7 @@ class _MapPageState extends State<MapPage> {
       });
 
       _sideButtons.removeAt(0);
+
       _listKey.currentState?.removeItem(0, (context, animation) {
         return SlideTransition(
           position: animation
@@ -258,6 +263,7 @@ class _MapPageState extends State<MapPage> {
     center = LatLng(topCoordinate!.latitude, topCoordinate!.longitude);
     _mapController.move(center, 18);
 
+    // Reposition to starting point
     if (topTextController.text.isNotEmpty) {
       topCoordinate = await getCoordinateFromAddress(topTextController.text);
       _mapController.move(center, 18);
@@ -317,7 +323,7 @@ class _MapPageState extends State<MapPage> {
         coordinates.addAll(leg.points);
       }
 
-      // Shorten list of coordinates for efficiency
+      // Abstract list of coordinates for performance
       coordinates = coordinates
           .asMap()
           .entries
@@ -327,13 +333,15 @@ class _MapPageState extends State<MapPage> {
     } else {
       coordinates = [];
     }
+
+    // We want sights within radius of points along predetermined route
     List<Future<List<Sight>>> predetSightFutures = coordinates
         .map((coordinate) =>
             getSights(coordinate.toLatLng(), radiusInMiles * METERS_IN_A_MILE))
         .toList();
     List<List<Sight>> predetSights = await Future.wait(predetSightFutures);
 
-    // transfer all sights to recommendedSights
+    // Transfer all sights to recommendedSights
     for (List<Sight> sights in predetSights) {
       recommendedSights.addAll(sights);
     }
@@ -354,7 +362,6 @@ class _MapPageState extends State<MapPage> {
         return null;
       }
     }
-
     permissionGranted = await location.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
@@ -372,6 +379,7 @@ class _MapPageState extends State<MapPage> {
 
   void recommendedToSelected(int index) {
     setState(() {
+      // Trigger route recalculation when navigation selected
       sightsChanged = true;
       currentJourney.addSight(recommendedSights.removeAt(index));
     });
@@ -379,6 +387,7 @@ class _MapPageState extends State<MapPage> {
 
   void selectedToRecommended(int index) {
     setState(() {
+      // Trigger route recalculation when navigation selected
       sightsChanged = true;
       recommendedSights.add(currentJourney.removeSight(index));
     });
@@ -441,6 +450,7 @@ class _MapPageState extends State<MapPage> {
                           urlTemplate:
                               'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         ),
+                        // Radius around starting location
                         if (!_showBottomTextField)
                           CircleLayer(
                             circles: [
@@ -455,6 +465,7 @@ class _MapPageState extends State<MapPage> {
                               ),
                             ],
                           ),
+                        // Radius around points along predetermined route
                         CircleLayer(
                           circles: coordinates
                               .map((Coordinate coordinate) => CircleMarker(
@@ -469,6 +480,7 @@ class _MapPageState extends State<MapPage> {
                                   ))
                               .toList(),
                         ),
+                        // Different icon to make destination clear to user
                         if (currentJourney.route != null)
                           MarkerLayer(
                             markers: [
@@ -483,6 +495,7 @@ class _MapPageState extends State<MapPage> {
                                   )),
                             ],
                           ),
+                        // Sights are indicated with marker - press on marker to go to Wikipedia page
                         MarkerLayer(
                           markers: currentJourney
                               .sights()
@@ -501,8 +514,6 @@ class _MapPageState extends State<MapPage> {
                                                         const TextScaler.linear(
                                                             1.2)),
                                                 ElevatedButton(
-                                                    child: const Text(
-                                                        "Open in Wikipedia"),
                                                     onPressed:
                                                         sight.getWikipediaTitle() ==
                                                                 null
@@ -514,7 +525,9 @@ class _MapPageState extends State<MapPage> {
                                                                         "/wiki/${sight.getWikipediaTitle()}"),
                                                                     mode: LaunchMode
                                                                         .inAppBrowserView);
-                                                              })
+                                                              },
+                                                    child: const Text(
+                                                        "Open in Wikipedia"))
                                               ])),
                                       child: const Icon(
                                         Icons.location_pin,
@@ -528,6 +541,7 @@ class _MapPageState extends State<MapPage> {
                 }
                 return const Center(child: CircularProgressIndicator());
               }),
+          // UI for starting point and destination search bars
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

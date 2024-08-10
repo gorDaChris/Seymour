@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:seymour_app/Common/Models/journey.dart';
-import 'package:seymour_app/Common/Queries/get_filters.dart';
 import 'package:seymour_app/Views/map_page.dart';
 
 /*
@@ -40,6 +39,11 @@ class _SavePageState extends State<SavePage> {
 
   Future<List<File>> get _localJourneyFiles async {
     final path = await _localPath;
+
+    if (!Directory('$path/journeys/').existsSync()) {
+      Directory('$path/journeys/').create(recursive: true);
+    }
+
     return Directory('$path/journeys/').listSync().whereType<File>().toList();
   }
 

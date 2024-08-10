@@ -50,7 +50,6 @@ class _DraggableMenuState extends State<DraggableMenu> {
       borderRadius: br,
       panelSnapping: false,
       minHeight: 50,
-      // maxHeight: MediaQuery.of(context).size.height * 0.8,
       body: widget.backgroundChild,
 
       //This ListView may have to be changed to ListView.builder when it eventually displays locations
@@ -116,7 +115,6 @@ class _DraggableMenuState extends State<DraggableMenu> {
                 child: ListView.builder(
                 itemCount: currentJourney.sights().length,
                 itemBuilder: (context, index) {
-                  // TODO: clickable; they should be buttons
                   return ListTile(
                     title: Text(currentJourney.sights()[index].name()),
                     onTap: () {
@@ -144,7 +142,6 @@ class _DraggableMenuState extends State<DraggableMenu> {
                 child: ListView.builder(
                 itemCount: widget.recommendedSights.length,
                 itemBuilder: (context, index) {
-                  // TODO: clickable; they should be buttons
                   return ListTile(
                     title: Text(widget.recommendedSights[index].name()),
                     onTap: () {

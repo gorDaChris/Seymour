@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,7 +11,8 @@ import 'package:seymour_app/Views/map_page.dart';
 // DEV
 // import 'dart:developer';
 
-class SurveyPage extends StatefulWidget {
+class SurveyPage extends StatefulWidget 
+{
   const SurveyPage({
     super.key,
     required this.getNearbySights
@@ -22,18 +24,22 @@ class SurveyPage extends StatefulWidget {
   State<SurveyPage> createState() => _SurveyPageState();
 }
 
-class _SurveyPageState extends State<SurveyPage> {
+class _SurveyPageState extends State<SurveyPage>
+{
   // TODO: read from file on load
   List<Tag> tags = FilteredTags.tags.values.toList();
 
   Future<void> _saveCheckedItems() async {
-    try {
+    try 
+    {
       final file = await _localFile;
       String jsonStr = jsonEncode(tags);
       await file.writeAsString(jsonStr);
       setFiltersInternal();
-    } catch (e) {
-      print('Error saving tags: $e');
+    } 
+    catch (e) 
+    {
+      log('Error saving tags: $e');
     }
   }
   Future<File> get _localFile async {
@@ -42,12 +48,14 @@ class _SurveyPageState extends State<SurveyPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () async {
+          onPressed: () async 
+          {
             Navigator.pop(context);
             if (settingsChanged) {
               settingsChanged = false;
